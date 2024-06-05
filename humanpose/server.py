@@ -20,11 +20,11 @@ def serve():
     health_pb2_grpc.add_HealthServicer_to_server(health.HealthServicer(), server)
 
     server.add_insecure_port(HOST)
-    print(f"[🚀] gRPC server started and listening on {HOST}")
+    print(f"[] gRPC server started and listening on {HOST}")
     server.start()
     server.wait_for_termination()
 
 
 if __name__ == '__main__':
     serve()
-    print("[🚀] Server closed.")
+    print("[] Server closed.")

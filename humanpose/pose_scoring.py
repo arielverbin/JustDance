@@ -7,10 +7,11 @@ from grpc_service import service_pb2
 class PoseScoringService(service_pb2_grpc.ScoringPoseService):
 
     def __init__(self):
-        self.state = 0
+        self.model_path = './weights/vitpose.pth'
+        self.yolo_path = './weights/yolov5s.pt'
+        self.model = None
 
     def loadService(self, request, context):
-        time.sleep(10)
         return service_pb2.loadStatus(status="success")
 
     def getScore(self, request, context):
