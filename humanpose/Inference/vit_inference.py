@@ -100,6 +100,7 @@ class VitInference:
 
     def initialize_tracker(self):
         min_hits = 3 if self.yolo_step == 1 else 1
+        # self.tracker = None
         self.tracker = Sort(max_age=self.yolo_step,
                             min_hits=min_hits,
                             iou_threshold=0.3)

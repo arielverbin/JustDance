@@ -234,7 +234,6 @@ class PatchEmbed(nn.Module):
         Hp, Wp = x.shape[2], x.shape[3]
 
         x = x.flatten(2).transpose(1, 2)
-        print("after p-emd: ", x.shape)
         return x, (Hp, Wp)
 
 

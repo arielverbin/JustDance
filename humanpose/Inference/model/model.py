@@ -14,7 +14,6 @@ class ViTPose(nn.Module):
         head_cfg = {k: v for k, v in cfg['keypoint_head'].items() if k != 'type'}
 
         self.backbone = ViT(**backbone_cfg)
-        print(head_cfg)
         self.keypoint_head = TopdownHeatmapSimpleHead(**head_cfg)
 
     def forward_features(self, x):

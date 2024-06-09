@@ -152,12 +152,9 @@ class TopdownHeatmapSimpleHead(nn.Module):
         return losses
 
     def forward(self, x):
-        print("BC shape: ", x.shape)
         """Forward function."""
         x = self.deconv_layers(x)
-        print("post de-conv: ", x.shape)
         x = self.final_layer(x)
-        print("OP shape: ", x.shape)
         return x
 
     def _init_inputs(self, in_channels, in_index, input_transform):
