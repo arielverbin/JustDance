@@ -1,6 +1,6 @@
 import cv2
 from Inference.vit_inference import VitInference
-from Comparasion.compare_poses import Score
+from Comparasion.angular_score import AngularScore
 
 # Initialize the webcam (camera index 0)
 capture = cv2.VideoCapture(0)
@@ -42,6 +42,8 @@ correct_pose = [[92.806, 544.87, 0.95411],
                 [456.67, 644.63, 0.92357],
                 [651.52, 536.49, 0.93722]]
 
+angular_score = AngularScore(correct_pose, factor=4)
+
 while True:
     ret, img = capture.read()
     if not ret:
@@ -53,13 +55,13 @@ while True:
 
     keypoints = model.inference(img)
 
-    img = model.draw(show_yolo=True)  # Display predicted bbox and skeleton.
+    img = model.draw(show_yolo=False)  # Display predicted bbox and skeleton.
 
     # print(keypoints)  # For setting a new correct_pose.
 
     if keypoints:
         current_pose = next(iter(keypoints.values()))
-        score = Score(current_pose, correct_pose, score_method="angular", factor=5).get_score()
+        score = angular_score.compare(current_pose, AngularScore.convert_to_score)
     else:
         score = 0
 

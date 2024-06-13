@@ -26,3 +26,31 @@ def calc_angle(vec1, vec2):
 
     # Compute the angle in radians - and scale to [0,2]
     return np.degrees(angle_radians)
+
+
+def calculate_gaussian_weights(num_weights, time_interval, bias, sigma):
+    f"""
+    Samples {num_weights} values from the gaussian distribution.
+
+    Parameters:
+    -----------
+    num_weights : int
+        The number of weights to generate.
+    time_interval : float
+        The time interval between each weight.
+    bias : float
+        The bias from the middle of the time.
+    sigma : float
+        The sigma parameter determining how quickly the weight decreases from its peak.
+
+    Returns:
+    --------
+    array_like
+        An array of weights generated based on a Gaussian distribution.
+    """
+    # Calculate weights using Gaussian distribution
+    indices = np.arange(num_weights)
+    bias = (num_weights // 2) * time_interval - bias
+    weights = np.exp(-0.5 * ((indices * time_interval - bias) / sigma) ** 2)
+
+    return weights
