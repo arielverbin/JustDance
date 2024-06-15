@@ -56,7 +56,7 @@ class AngularScore(PoseScore):
         """
             Compares the two poses using the angular method.
             Returns:
-                (int): the score between 100 and 0.
+                (float): the comparison result (where 0 is best).
         """
 
         v2 = pose.get_coordinates()
@@ -81,7 +81,7 @@ class AngularScore(PoseScore):
         """
             Convert a comparison value to a score.
             Args:
-                value (float): the comparison value (in scale of (0,50) where 0 is best).
+                value (float): the comparison value (in scale of (0,~70) where 0 is best).
             Returns:
                 (int): the score between 100 and 0.
         """

@@ -36,7 +36,7 @@ class PoseSequence:
     def preprocess_poses(self, preprocess_method):
         self.preprocessed_poses = []
         for pose in self.poses:
-            self.preprocessed_poses.append(preprocess_method((pose)))
+            self.preprocessed_poses.append(preprocess_method(pose))
 
     def __iter__(self):
         return iter(self.poses)

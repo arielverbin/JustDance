@@ -8,11 +8,11 @@ from Comparasion.cosine_pose import CosineScore
 
 
 class PoseSequenceScore:
-    def __init__(self, target_poses, score_method, window_duration, weights_config):
+    def __init__(self, pose_sequence, score_method, window_duration, weights_config):
         """
             Parameters:
             -----------
-            target_poses : PoseSequence
+            pose_sequence : PoseSequence
                 The sequence of target poses to compare against.
             score_method : string
                 The scoring method used to compare poses.
@@ -22,23 +22,37 @@ class PoseSequenceScore:
                 The configs for weighting the scores based on their proximity to the given time.
 
         """
-        assert isinstance(target_poses, PoseSequence)
+        assert isinstance(pose_sequence, PoseSequence)
         assert isinstance(score_method, PoseScore)
         assert score_method in ["angular", "cosine"]
 
-        self.score_method = AngularScore(4) if score_method == "angular" else CosineScore()
+        self.score_method = AngularScore(factor=4) if score_method == "angular" else CosineScore()
 
         self.window_duration = window_duration
-        self.weights = self.init_weights(weights_config, target_poses.duration_to_frames(duration=window_duration))
+        self.weights = self.init_weights(weights_config=weights_config,
+                                         window_size=pose_sequence.duration_to_frames(duration=window_duration),
+                                         fps=pose_sequence.fps)
 
         self.preprocessed_target = None
-        self.target_poses = target_poses.preprocess_poses(preprocess_method=self.score_method.process_target)
+        self.target_poses = pose_sequence.preprocess_poses(preprocess_method=self.score_method.process_target)
 
     @staticmethod
-    def init_weights(weights_config, window_size):
-        dont_punish = weights_config["dont_punish"]
-        shift = weights_config["shift"]
-        punish_factor = weights_config["punish_factor"]
+    def init_weights(weights_config, window_size, fps):
+        """
+        Inits weights to punish matches that occurs on the edges of the window.
+        If the player's pose was accurate, but delayed - decrease the score by some factor.
+
+        Parameters:
+            weights_config: dict
+                configs for the weight initialization.
+            window_size: int
+                the number of frame in the window.
+            fps: int
+                the fps of the window's frame.
+        """
+        dont_punish = int(weights_config["dont_punish"] * fps)
+        shift = int(weights_config["shift"] * fps)
+        punish_factor = weights_config["punish_factor"] / fps
 
         assert dont_punish <= window_size
         if shift >= dont_punish / 2:
@@ -89,8 +103,20 @@ class PoseSequenceScore:
 
 
 # Example usage
+""" This includes:
 
-weights_config = {"dont_punish": 4, "shift": 3, "punish_factor": 1}
-window_size = 20
-weights = PoseSequenceScore.init_weights(weights_config, window_size)
+    - dont_punish: float
+        If the player have delay of less than {dont_punish} seconds. We will not punish the player's score.
+        
+    - shift: float
+        The area (of {dont_punish} seconds) in the middle in which we will not punish the player's delay,
+        will be shifted {shift} seconds to the right.
+        
+    - punish_factor: float
+        Every second of delay will result in a punish of {punish_factor} points to the player's score.
+"""
+
+weights_config = {"dont_punish": 1, "shift": 0.5, "punish_factor": 5}
+window_size = 15  # for 5 fps, window_size=15 means a window of 3 seconds.
+weights = PoseSequenceScore.init_weights(weights_config, window_size, fps=5)
 print(weights)

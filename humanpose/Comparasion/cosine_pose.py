@@ -8,7 +8,7 @@ class CosineScore(PoseScore):
         """
             Compares the two poses using the cosine similarity method.
             Returns:
-                (int): the score between 100 and 0.
+                (float): the comparison result between -1 and 1 (where 0 is best).
         """
 
         v2 = pose.get_coordinates().flatten()
