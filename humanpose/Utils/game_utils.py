@@ -34,6 +34,7 @@ def score_dance(model, comparator, score_controller, game_manager):
 
     while True:
 
+        # Waits for game to start.
         game_manager.wait_for_game_start()
 
         keypoints = model.inference()
