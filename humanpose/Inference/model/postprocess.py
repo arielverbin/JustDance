@@ -164,9 +164,6 @@ def keypoints_from_heatmaps(heatmaps, center, scale, kernel=11, use_udp=False):
         center (np.ndarray[N, 2]): Center of the bounding box (x, y).
         scale (np.ndarray[N, 2]): Scale of the bounding box
             wrt height/width.
-        post_process (str/None): Choice of methods to post-process
-            heatmaps. Currently supported: None, 'default', 'unbiased',
-            'megvii'.
         kernel (int): Gaussian kernel size (K) for modulation, which should
             match the heatmap gaussian sigma when training.
             K=17 for sigma=3 and k=11 for sigma=2.

@@ -76,6 +76,8 @@ class TopdownHeatmapSimpleHead(nn.Module):
             raise ValueError(
                 f'num_deconv_layers ({num_deconv_layers}) should >= 0.')
 
+        padding = 0
+
         identity_final_layer = False
         if extra is not None and 'final_conv_kernel' in extra:
             assert extra['final_conv_kernel'] in [0, 1, 3]

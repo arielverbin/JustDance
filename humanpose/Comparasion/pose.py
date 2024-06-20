@@ -11,7 +11,7 @@ class Pose:
         """
             Extracts only the coordinates from the pose (removes the confidence scores).
         """
-        if not self.coordinates:
+        if self.coordinates is None:
             self.coordinates = self.keypoints[:, :2]
         return self.coordinates
 
@@ -19,7 +19,7 @@ class Pose:
         """
             Extracts only the confidence scores from the pose (removes the coordinates).
         """
-        if not self.probabilities:
+        if self.probabilities is None:
             self.probabilities = self.keypoints[:, 2]
         return self.probabilities
 
@@ -42,4 +42,3 @@ class Pose:
 
         self.keypoints = normalized_arr
         return self
-

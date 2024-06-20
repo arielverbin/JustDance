@@ -146,7 +146,7 @@ class KalmanBoxTracker(object):
         return convert_x_to_bbox(self.kf.x)
 
 
-def associate_detections_to_trackers(detections, trackers, iou_threshold=0.3):
+def associate_detections_to_trackers(detections, trackers, iou_threshold=0.1):
     """
     Assigns detections to tracked object (both represented as bounding boxes)
 
@@ -188,11 +188,17 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold=0.3):
     else:
         matches = np.concatenate(matches, axis=0)
 
+    # Bind exactly one unmatched detection and one unmatched tracker
+    if len(unmatched_detections) == 1 and len(unmatched_trackers) == 1:
+        matches = np.concatenate((matches, np.array([[unmatched_detections[0], unmatched_trackers[0]]])), axis=0)
+        unmatched_detections = []
+        unmatched_trackers = []
+
     return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
 
 class Sort(object):
-    def __init__(self, max_age=1, min_hits=3, iou_threshold=0.3):
+    def __init__(self, max_age=1, min_hits=3, iou_threshold=0.1):
         """
         Sets key parameters for SORT
         """
@@ -206,7 +212,7 @@ class Sort(object):
         """
         Params: dets - a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
         Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
-        5)) for frames without detections). Returns the a similar array, where the last column is the object ID.
+        5)) for frames without detections). Returns a similar array, where the last column is the object ID.
 
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
@@ -255,3 +261,7 @@ class Sort(object):
         elif empty_dets:
             return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
         return np.empty((0, 6))
+
+    def reset(self):
+        self.trackers = []
+        self.frame_count = 0

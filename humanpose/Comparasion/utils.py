@@ -4,6 +4,11 @@ import numpy as np
 def calc_angle(vec1, vec2):
     """
         Calculate the angle between two vectors in the format (x1,y1), (x2,y2).
+        Args:
+            vec1: tuple
+                The first vector
+            vec2: tuple
+                the second vector
         Returns:
             (float): the angle in degrees.
     """
@@ -17,6 +22,9 @@ def calc_angle(vec1, vec2):
     # Compute the magnitudes of the vectors
     magnitude_v1 = np.linalg.norm(v1)
     magnitude_v2 = np.linalg.norm(v2)
+
+    if magnitude_v1 == 0 or magnitude_v2 == 0:
+        return 0
 
     # Compute the cosine of the angle
     cos_angle = dot_product / (magnitude_v1 * magnitude_v2)
@@ -54,3 +62,13 @@ def calculate_gaussian_weights(num_weights, time_interval, bias, sigma):
     weights = np.exp(-0.5 * ((indices * time_interval - bias) / sigma) ** 2)
 
     return weights
+
+
+def weighted_avg(arr, weights):
+    assert len(arr) == len(weights)
+
+    weighted_sum = sum(a * w for a, w in zip(arr, weights))
+    sum_of_weights = sum(weights)
+    weighted_average = weighted_sum / sum_of_weights
+
+    return weighted_average

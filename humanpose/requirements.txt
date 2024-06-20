@@ -2,8 +2,3 @@
 grpcio
 opencv-python~=4.10.0.82
 grpcio-health-checking
-
-torch~=2.2.2
-numpy~=1.26.4
-ultralytics~=8.2.28
-filterpy~=1.4.5
