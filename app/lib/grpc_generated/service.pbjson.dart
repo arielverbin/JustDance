@@ -39,12 +39,16 @@ const GameRequest$json = {
   '1': 'GameRequest',
   '2': [
     {'1': 'songTitle', '3': 1, '4': 1, '5': 9, '10': 'songTitle'},
+    {'1': 'numberOfPlayers', '3': 2, '4': 1, '5': 5, '10': 'numberOfPlayers'},
+    {'1': 'gameSpeed', '3': 3, '4': 1, '5': 5, '10': 'gameSpeed'},
   ],
 };
 
 /// Descriptor for `GameRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List gameRequestDescriptor = $convert.base64Decode(
-    'CgtHYW1lUmVxdWVzdBIcCglzb25nVGl0bGUYASABKAlSCXNvbmdUaXRsZQ==');
+    'CgtHYW1lUmVxdWVzdBIcCglzb25nVGl0bGUYASABKAlSCXNvbmdUaXRsZRIoCg9udW1iZXJPZl'
+    'BsYXllcnMYAiABKAVSD251bWJlck9mUGxheWVycxIcCglnYW1lU3BlZWQYAyABKAVSCWdhbWVT'
+    'cGVlZA==');
 
 @$core.Deprecated('Use gameStatusDescriptor instead')
 const GameStatus$json = {
@@ -74,15 +78,18 @@ final $typed_data.Uint8List timeRequestDescriptor = $convert.base64Decode(
 const ScoreResponse$json = {
   '1': 'ScoreResponse',
   '2': [
-    {'1': 'score', '3': 1, '4': 1, '5': 1, '10': 'score'},
-    {'1': 'time', '3': 2, '4': 1, '5': 5, '10': 'time'},
+    {'1': 'score1', '3': 1, '4': 1, '5': 5, '10': 'score1'},
+    {'1': 'totalScore1', '3': 3, '4': 1, '5': 5, '10': 'totalScore1'},
+    {'1': 'score2', '3': 2, '4': 1, '5': 5, '10': 'score2'},
+    {'1': 'totalScore2', '3': 4, '4': 1, '5': 5, '10': 'totalScore2'},
   ],
 };
 
 /// Descriptor for `ScoreResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List scoreResponseDescriptor = $convert.base64Decode(
-    'Cg1TY29yZVJlc3BvbnNlEhQKBXNjb3JlGAEgASgBUgVzY29yZRISCgR0aW1lGAIgASgFUgR0aW'
-    '1l');
+    'Cg1TY29yZVJlc3BvbnNlEhYKBnNjb3JlMRgBIAEoBVIGc2NvcmUxEiAKC3RvdGFsU2NvcmUxGA'
+    'MgASgFUgt0b3RhbFNjb3JlMRIWCgZzY29yZTIYAiABKAVSBnNjb3JlMhIgCgt0b3RhbFNjb3Jl'
+    'MhgEIAEoBVILdG90YWxTY29yZTI=');
 
 @$core.Deprecated('Use endRequestDescriptor instead')
 const EndRequest$json = {
@@ -96,9 +103,17 @@ final $typed_data.Uint8List endRequestDescriptor = $convert.base64Decode(
 @$core.Deprecated('Use endStatusDescriptor instead')
 const EndStatus$json = {
   '1': 'EndStatus',
+  '2': [
+    {'1': 'status', '3': 1, '4': 1, '5': 9, '10': 'status'},
+    {'1': 'winner', '3': 2, '4': 1, '5': 5, '10': 'winner'},
+    {'1': 'totalScore1', '3': 3, '4': 1, '5': 5, '10': 'totalScore1'},
+    {'1': 'totalScore2', '3': 4, '4': 1, '5': 5, '10': 'totalScore2'},
+  ],
 };
 
 /// Descriptor for `EndStatus`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List endStatusDescriptor = $convert.base64Decode(
-    'CglFbmRTdGF0dXM=');
+    'CglFbmRTdGF0dXMSFgoGc3RhdHVzGAEgASgJUgZzdGF0dXMSFgoGd2lubmVyGAIgASgFUgZ3aW'
+    '5uZXISIAoLdG90YWxTY29yZTEYAyABKAVSC3RvdGFsU2NvcmUxEiAKC3RvdGFsU2NvcmUyGAQg'
+    'ASgFUgt0b3RhbFNjb3JlMg==');
 

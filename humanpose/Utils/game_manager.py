@@ -2,6 +2,9 @@ import threading
 
 
 class GameManager:
+    """
+    This class is responsible for the communication between the threads of the algorithm, and the flutter app.
+    """
 
     def __init__(self):
         self.game_state_lock = threading.Lock()
@@ -64,7 +67,7 @@ class GameManager:
         """
         with self.score_condition:
             self.last_score = score
-            self.score_condition.notify()
+            self.score_condition.notify_all()
 
     def reset(self):
         """

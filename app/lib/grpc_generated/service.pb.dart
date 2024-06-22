@@ -98,10 +98,18 @@ class LoadStatus extends $pb.GeneratedMessage {
 class GameRequest extends $pb.GeneratedMessage {
   factory GameRequest({
     $core.String? songTitle,
+    $core.int? numberOfPlayers,
+    $core.int? gameSpeed,
   }) {
     final $result = create();
     if (songTitle != null) {
       $result.songTitle = songTitle;
+    }
+    if (numberOfPlayers != null) {
+      $result.numberOfPlayers = numberOfPlayers;
+    }
+    if (gameSpeed != null) {
+      $result.gameSpeed = gameSpeed;
     }
     return $result;
   }
@@ -111,6 +119,8 @@ class GameRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GameRequest', createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'songTitle', protoName: 'songTitle')
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'numberOfPlayers', $pb.PbFieldType.O3, protoName: 'numberOfPlayers')
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'gameSpeed', $pb.PbFieldType.O3, protoName: 'gameSpeed')
     ..hasRequiredFields = false
   ;
 
@@ -143,6 +153,24 @@ class GameRequest extends $pb.GeneratedMessage {
   $core.bool hasSongTitle() => $_has(0);
   @$pb.TagNumber(1)
   void clearSongTitle() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get numberOfPlayers => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set numberOfPlayers($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasNumberOfPlayers() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearNumberOfPlayers() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get gameSpeed => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set gameSpeed($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasGameSpeed() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearGameSpeed() => clearField(3);
 }
 
 class GameStatus extends $pb.GeneratedMessage {
@@ -247,15 +275,23 @@ class TimeRequest extends $pb.GeneratedMessage {
 
 class ScoreResponse extends $pb.GeneratedMessage {
   factory ScoreResponse({
-    $core.double? score,
-    $core.int? time,
+    $core.int? score1,
+    $core.int? score2,
+    $core.int? totalScore1,
+    $core.int? totalScore2,
   }) {
     final $result = create();
-    if (score != null) {
-      $result.score = score;
+    if (score1 != null) {
+      $result.score1 = score1;
     }
-    if (time != null) {
-      $result.time = time;
+    if (score2 != null) {
+      $result.score2 = score2;
+    }
+    if (totalScore1 != null) {
+      $result.totalScore1 = totalScore1;
+    }
+    if (totalScore2 != null) {
+      $result.totalScore2 = totalScore2;
     }
     return $result;
   }
@@ -264,8 +300,10 @@ class ScoreResponse extends $pb.GeneratedMessage {
   factory ScoreResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ScoreResponse', createEmptyInstance: create)
-    ..a<$core.double>(1, _omitFieldNames ? '' : 'score', $pb.PbFieldType.OD)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'time', $pb.PbFieldType.O3)
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'score1', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'score2', $pb.PbFieldType.O3)
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'totalScore1', $pb.PbFieldType.O3, protoName: 'totalScore1')
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'totalScore2', $pb.PbFieldType.O3, protoName: 'totalScore2')
     ..hasRequiredFields = false
   ;
 
@@ -291,22 +329,40 @@ class ScoreResponse extends $pb.GeneratedMessage {
   static ScoreResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.double get score => $_getN(0);
+  $core.int get score1 => $_getIZ(0);
   @$pb.TagNumber(1)
-  set score($core.double v) { $_setDouble(0, v); }
+  set score1($core.int v) { $_setSignedInt32(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasScore() => $_has(0);
+  $core.bool hasScore1() => $_has(0);
   @$pb.TagNumber(1)
-  void clearScore() => clearField(1);
+  void clearScore1() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.int get time => $_getIZ(1);
+  $core.int get score2 => $_getIZ(1);
   @$pb.TagNumber(2)
-  set time($core.int v) { $_setSignedInt32(1, v); }
+  set score2($core.int v) { $_setSignedInt32(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasTime() => $_has(1);
+  $core.bool hasScore2() => $_has(1);
   @$pb.TagNumber(2)
-  void clearTime() => clearField(2);
+  void clearScore2() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get totalScore1 => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set totalScore1($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasTotalScore1() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotalScore1() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get totalScore2 => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set totalScore2($core.int v) { $_setSignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTotalScore2() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTotalScore2() => clearField(4);
 }
 
 class EndRequest extends $pb.GeneratedMessage {
@@ -342,12 +398,36 @@ class EndRequest extends $pb.GeneratedMessage {
 }
 
 class EndStatus extends $pb.GeneratedMessage {
-  factory EndStatus() => create();
+  factory EndStatus({
+    $core.String? status,
+    $core.int? winner,
+    $core.int? totalScore1,
+    $core.int? totalScore2,
+  }) {
+    final $result = create();
+    if (status != null) {
+      $result.status = status;
+    }
+    if (winner != null) {
+      $result.winner = winner;
+    }
+    if (totalScore1 != null) {
+      $result.totalScore1 = totalScore1;
+    }
+    if (totalScore2 != null) {
+      $result.totalScore2 = totalScore2;
+    }
+    return $result;
+  }
   EndStatus._() : super();
   factory EndStatus.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
   factory EndStatus.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EndStatus', createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'status')
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'winner', $pb.PbFieldType.O3)
+    ..a<$core.int>(3, _omitFieldNames ? '' : 'totalScore1', $pb.PbFieldType.O3, protoName: 'totalScore1')
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'totalScore2', $pb.PbFieldType.O3, protoName: 'totalScore2')
     ..hasRequiredFields = false
   ;
 
@@ -371,6 +451,42 @@ class EndStatus extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static EndStatus getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EndStatus>(create);
   static EndStatus? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get status => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set status($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get winner => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set winner($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasWinner() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearWinner() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get totalScore1 => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set totalScore1($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasTotalScore1() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTotalScore1() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get totalScore2 => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set totalScore2($core.int v) { $_setSignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTotalScore2() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTotalScore2() => clearField(4);
 }
 
 

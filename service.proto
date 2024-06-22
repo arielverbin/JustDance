@@ -15,6 +15,8 @@ message LoadStatus {
 
 message GameRequest {
   string songTitle = 1;
+  int32 numberOfPlayers = 2;
+  int32 gameSpeed = 3;
 }
 
 message GameStatus {
@@ -26,9 +28,17 @@ message TimeRequest {
 }
 
 message ScoreResponse {
-  double score = 1;
-  int32 time = 2;
+  int32 score1 = 1;
+  int32 totalScore1 = 3;
+  int32 score2 = 2;
+  int32 totalScore2 = 4;
 }
 
 message EndRequest {}
-message EndStatus {}
+
+message EndStatus {
+  string status = 1;
+  int32 winner = 2;
+  int32 totalScore1 = 3;
+  int32 totalScore2 = 4;
+}

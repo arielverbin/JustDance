@@ -4,6 +4,12 @@ from Comparasion.pose import Pose
 
 
 def track_players(model, game_manager):
+    """
+    Works on its own thread. Responsible for accessing the camera and tracking the players.
+    Args:
+        model: the inference model.
+        game_manager: used to contact with the other threads.
+    """
     capture = cv2.VideoCapture(0)
 
     while True:
@@ -29,6 +35,14 @@ def track_players(model, game_manager):
 
 
 def score_dance(model, comparator, score_controller, game_manager):
+    """
+    Works on its own thread. Responsible for performing the human pose estimation and calculating the score.
+    Args:
+        model: the inference model.
+        comparator: the comparator method.
+        score_controller: the method for stabilizing the score and calculating the total score.
+        game_manager: used to contact with the other threads.
+    """
 
     start_time = None
 
@@ -37,6 +51,7 @@ def score_dance(model, comparator, score_controller, game_manager):
         # Waits for game to start.
         game_manager.wait_for_game_start()
 
+        # Inference keypoints of every person in the frame.
         keypoints = model.inference()
 
         if start_time is None:

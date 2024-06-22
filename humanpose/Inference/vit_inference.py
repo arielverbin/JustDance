@@ -154,7 +154,6 @@ class VitInference:
 
         return bboxes, ids, scores
 
-
     def inference(self, img=None) -> dict[typing.Any, typing.Any]:
         """
         Inferences the keypoints for each person's pose in the image.
@@ -198,6 +197,7 @@ class VitInference:
             keypoints[:, :2] += bbox[:2][::-1] - [top_pad, left_pad]
             frame_keypoints[id] = keypoints
 
+        # Save state
         self._img = img
         self._tracker_res = bboxes, ids, scores
         self._keypoints = frame_keypoints

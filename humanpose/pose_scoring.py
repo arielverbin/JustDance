@@ -48,6 +48,9 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
             GameStatus: status of game initialization ('running' if the game was loaded successfully)
         """
         song_title = request.songTitle
+        num_players = request.numOfPlayers  # TODO: Handle players initialization.
+        game_speed = request.gameSpeed  # TODO: Training mode: set gameplay speed.
+
         pose_sequence = load_from(f"./Songs/{song_title}.pkl")
         target_sequence = PoseSequence(pose_sequence, fps=10)
         weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}
@@ -73,7 +76,14 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         """
         Returns the scores for the players on the most recent frame (current score and total score for each player).
         """
-        return service_pb2.ScoreResponse(score=self.game_manager.get_score()[1][0])
+        score = self.game_manager.get_score()
+        score1 = score[1] if score[1] is not None else (0, 0)
+        score2 = score[2] if score[2] is not None else (0, 0)
+
+        return service_pb2.ScoreResponse(score1=score1[0],
+                                         totalScore1=score1[1],
+                                         score2=score2[0],
+                                         totalScore2=score2[1])
 
     def endGame(self, request, context):
         """
@@ -89,4 +99,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.game_manager.reset()
         self.model.reset()
 
-        return service_pb2.EndStatus(status="success")
+        return service_pb2.EndStatus(status="success",
+                                     winner=1,
+                                     totalScore1=0,
+                                     totalScore2=0)
