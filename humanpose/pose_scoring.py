@@ -30,11 +30,11 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         Returns:
             LoadStatus: load status ('success' if the loading was successful)
         """
-        model_path = '../Inference/weights/vitpose-b-coco.pth'
-        yolo_path = '../Inference/weights/yolov5su.pt'
+        model_path = './Inference/weights/vitpose-b-coco.pth'
+        yolo_path = './Inference/weights/yolov5su.pt'
         try:
             self.model = VitInference(model_path, yolo_path)
-            self.game_manager = GameManager()
+            self.game_manager = GameManager(inference_model=self.model)
 
         except Exception as e:
             return service_pb2.LoadStatus(status=f"Error: {str(e)}")
@@ -59,9 +59,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
                                             weights_config=weights_config)
         self.score_controller = ScoreController()
 
-        self.tracking_thread = threading.Thread(target=track_players, args=(self.model, self.game_manager))
-        self.pose_estimation_thread = threading.Thread(target=score_dance, args=(self.model,
-                                                                                 self.comparator,
+        self.tracking_thread = threading.Thread(target=track_players, args=(self.game_manager,))
+        self.pose_estimation_thread = threading.Thread(target=score_dance, args=(self.comparator,
                                                                                  self.score_controller,
                                                                                  self.game_manager))
 
@@ -69,7 +68,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.pose_estimation_thread.start()
 
         time.sleep(0.5)
-        self.game_manager.start_game()
+        self.game_manager.start_game(self.comparator)
         return service_pb2.GameStatus(status="running")
 
     def getScore(self, request, context):

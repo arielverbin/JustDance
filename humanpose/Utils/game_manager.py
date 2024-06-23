@@ -1,4 +1,5 @@
 import threading
+import cv2
 
 
 class GameManager:
@@ -6,7 +7,7 @@ class GameManager:
     This class is responsible for the communication between the threads of the algorithm, and the flutter app.
     """
 
-    def __init__(self):
+    def __init__(self, inference_model):
         self.game_state_lock = threading.Lock()
         self.game_condition = threading.Condition(self.game_state_lock)
         self.game_started = False
@@ -14,6 +15,9 @@ class GameManager:
         self.score_lock = threading.Lock()
         self.score_condition = threading.Condition(self.score_lock)
         self.last_score = None
+
+        self.capture = cv2.VideoCapture(0)
+        self.model = inference_model
 
     def start_game(self):
         """
@@ -68,6 +72,12 @@ class GameManager:
         with self.score_condition:
             self.last_score = score
             self.score_condition.notify_all()
+
+    def get_inference_model(self):
+        return self.model
+
+    def get_camera_access(self):
+        return self.capture
 
     def reset(self):
         """

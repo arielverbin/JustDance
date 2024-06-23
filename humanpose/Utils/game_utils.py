@@ -3,14 +3,14 @@ import time
 from Comparasion.pose import Pose
 
 
-def track_players(model, game_manager):
+def track_players(game_manager):
     """
     Works on its own thread. Responsible for accessing the camera and tracking the players.
     Args:
-        model: the inference model.
         game_manager: used to contact with the other threads.
     """
-    capture = cv2.VideoCapture(0)
+    model = game_manager.get_inference.model()
+    capture = game_manager.get_camera_access()
 
     while True:
         ret, img = capture.read()
@@ -34,15 +34,15 @@ def track_players(model, game_manager):
     cv2.destroyAllWindows()
 
 
-def score_dance(model, comparator, score_controller, game_manager):
+def score_dance(comparator, score_controller, game_manager):
     """
     Works on its own thread. Responsible for performing the human pose estimation and calculating the score.
     Args:
-        model: the inference model.
         comparator: the comparator method.
         score_controller: the method for stabilizing the score and calculating the total score.
         game_manager: used to contact with the other threads.
     """
+    model = game_manager.get_inference.model()
 
     start_time = None
 
