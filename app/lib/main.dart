@@ -6,7 +6,9 @@ import 'package:app/pages/homepage.dart';
 import 'package:app/utils/service/client.dart';
 import 'package:app/utils/service/init_py.dart';
 import 'package:app/utils/service/init_py_native.dart';
+import 'package:app/pages/game_start.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
+import 'package:app/animations.dart';
 
 Future<void> initService = Future(() => null);
 
@@ -14,7 +16,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   initService = initPy();
 
-  runApp(const MainApp());
+  runApp(const AnimationApp());  // Change back to MainApp!
 }
 
 class MainApp extends StatelessWidget {
