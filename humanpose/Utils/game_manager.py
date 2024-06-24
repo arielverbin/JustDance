@@ -16,13 +16,19 @@ class GameManager:
         self.score_condition = threading.Condition(self.score_lock)
         self.last_score = None
 
-        self.capture = cv2.VideoCapture(0)
+        self.capture = None
         self.model = inference_model
+        self.players = None
 
-    def start_game(self):
+    def init_camera(self):
+        self.capture = cv2.VideoCapture(0)
+
+    def start_game(self, players):
         """
         Notify the threads that the game should start.
         """
+        self.players = players
+
         with self.game_condition:
             self.game_started = True
             self.game_condition.notify_all()
@@ -63,6 +69,9 @@ class GameManager:
             self.last_score = None
             return score
 
+    def get_players(self):
+        return self.players
+
     def update_score(self, score):
         """
         Updates last score with the most recent one and notifies the waiting thread.
@@ -83,6 +92,11 @@ class GameManager:
         """
         Resets the game manager for the next game.
         """
+        self.players = None
+        self.capture.release()
+        self.capture = None
+        cv2.destroyAllWindows()
+
         with self.game_state_lock:
             self.game_started = False
 

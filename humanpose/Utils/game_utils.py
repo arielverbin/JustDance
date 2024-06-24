@@ -10,6 +10,7 @@ def track_players(game_manager):
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference.model()
+    players = game_manager.get_players()
     capture = game_manager.get_camera_access()
 
     while True:
@@ -23,7 +24,7 @@ def track_players(game_manager):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = cv2.flip(img, 1)
 
-        model.update_tracker(img)
+        model.update_tracker(img, protect=players)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
@@ -43,6 +44,7 @@ def score_dance(comparator, score_controller, game_manager):
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference.model()
+    players = game_manager.get_players()
 
     start_time = None
 
@@ -63,12 +65,19 @@ def score_dance(comparator, score_controller, game_manager):
 
         if keypoints:
             for player_id, current_pose in keypoints.items():
-                # Calculate comparison value.
-                comparison, _ = comparator.compare(pose=Pose(current_pose), time=current_time)
-                # Convert comparison value to score.
-                score = comparator.convert_to_score(comparison)
-                # Stabilize score and calculate total player's score.
-                scores[player_id] = score_controller.process_score(player_id, score, current_time)
+                if player_id in players:
+                    # Calculate comparison value.
+                    comparison, _ = comparator.compare(pose=Pose(current_pose), time=current_time)
+                    # Convert comparison value to score.
+                    score = comparator.convert_to_score(comparison)
+                    # Stabilize score and calculate total player's score.
+                    scores[player_id] = score_controller.process_score(player_id, score, current_time)
+
+        # For every player that was missed, give them a score of 0.
+        if len(scores) != len(players):
+            for player_id in players:
+                if player_id not in scores:
+                    scores[player_id] = score_controller.process_score(player_id, 0, current_time)
 
         game_manager.update_score(scores)
 

@@ -120,11 +120,12 @@ class VitInference:
                             min_hits=min_hits,
                             iou_threshold=0.3)
 
-    def update_tracker(self, img: np.ndarray):
+    def update_tracker(self, img: np.ndarray, protect):
         """
         Updates the person tracker with the next frame.
         Args:
             img: the next frame.
+            protect: (list of ints) player ID's that should not be deleted, even if their detection is missing.
 
         Returns:
             the predicted bboxes for each person with a tracker.
@@ -140,7 +141,7 @@ class VitInference:
                                results.boxes.data.cpu().numpy() if r[4] > 0.35]).reshape((-1, 5))
         self.frame_counter += 1
 
-        res_pd = self.tracker.update(res_pd)
+        res_pd = self.tracker.update(res_pd, protect=protect)
 
         bboxes = res_pd[:, :4].round().astype(int)
         scores = res_pd[:, 4].tolist()

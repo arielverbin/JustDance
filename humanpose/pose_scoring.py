@@ -1,7 +1,7 @@
 from Utils.load_utils import load_from
 from Utils.game_manager import GameManager
 from Utils.game_utils import track_players, score_dance
-
+from Utils.game_initializer import GameInitializer
 import threading
 from Comparasion.pose_sequence import PoseSequence
 from Comparasion.pose_sequence_score import PoseSequenceScore
@@ -9,7 +9,6 @@ from Score.score_controller import ScoreController
 from Inference.vit_inference import VitInference
 from grpc_service import service_pb2_grpc
 from grpc_service import service_pb2
-import time
 
 
 class PoseScoringService(service_pb2_grpc.ScoringPoseService):
@@ -49,7 +48,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         """
         song_title = request.songTitle
         num_players = request.numOfPlayers  # TODO: Handle players initialization.
-        game_speed = request.gameSpeed  # TODO: Training mode: set gameplay speed.
+        # game_speed = request.gameSpeed  # TODO: Training mode: set gameplay speed.
 
         pose_sequence = load_from(f"./Songs/{song_title}.pkl")
         target_sequence = PoseSequence(pose_sequence, fps=10)
@@ -59,6 +58,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
                                             weights_config=weights_config)
         self.score_controller = ScoreController()
 
+        self.game_manager.init_camera()
+
         self.tracking_thread = threading.Thread(target=track_players, args=(self.game_manager,))
         self.pose_estimation_thread = threading.Thread(target=score_dance, args=(self.comparator,
                                                                                  self.score_controller,
@@ -67,8 +68,9 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.tracking_thread.start()
         self.pose_estimation_thread.start()
 
-        time.sleep(0.5)
-        self.game_manager.start_game(self.comparator)
+        players = GameInitializer(self.game_manager, num_players).init_game(GameInitializer.RAISING_HANDS_POSE,
+                                                                            threshold=35)
+        self.game_manager.start_game(players)
         return service_pb2.GameStatus(status="running")
 
     def getScore(self, request, context):
@@ -76,8 +78,12 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         Returns the scores for the players on the most recent frame (current score and total score for each player).
         """
         score = self.game_manager.get_score()
-        score1 = score[1] if score[1] is not None else (0, 0)
-        score2 = score[2] if score[2] is not None else (0, 0)
+        players = self.game_manager.get_players()
+
+        p1 = players[0]
+        p2 = players[1] if players[1] is not None else None
+        score1 = score[p1] if score[p1] is not None else (0, 0)
+        score2 = score[p2] if p2 is not None else (0, 0)
 
         return service_pb2.ScoreResponse(score1=score1[0],
                                          totalScore1=score1[1],

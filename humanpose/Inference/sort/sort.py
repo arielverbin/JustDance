@@ -208,14 +208,25 @@ class Sort(object):
         self.trackers = []
         self.frame_count = 0
 
-    def update(self, dets=np.empty((0, 5))):
+    def update(self, dets=np.empty((0, 5)), protect=None):
         """
-        Params: dets - a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
-        Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
-        5)) for frames without detections). Returns a similar array, where the last column is the object ID.
+        Args:
+            dets: a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
+                Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
+                5)) for frames without detections).
+            protect: a list of ID's that should not be deleted, even if they are not detected.
+                For example, if protect=[player1, player2] and tracker1 (for player1) have no matching detections,
+                return player1's location solely based on the tracker1's prediction.
+
+        Returns:
+            Returns a similar array (like dets), where the last column is the object ID.
+                The returned array MUST include bbox for the protected ID's.
 
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
+        if protect is None:
+            protect = []
+
         self.frame_count += 1
         empty_dets = dets.shape[0] == 0
 

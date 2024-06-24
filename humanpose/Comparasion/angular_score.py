@@ -96,3 +96,4 @@ class AngularScore(PoseScore):
             return 10  # Nah
 
         return 0  # X
+

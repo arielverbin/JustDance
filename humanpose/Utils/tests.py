@@ -38,25 +38,10 @@ model_path = '../Inference/weights/vitpose-b-coco.pth'
 yolo_path = '../Inference/weights/yolov5su.pt'
 model = VitInference(model_path, yolo_path)
 game_manager = GameManager(inference_model=model)
-comparator = AngularScore(factor=5)
 
-game_init = GameInitializer(game_manager, numer_players=2)
-print(game_init.init_game(comparator, starting_pose=None, threshold=15))
+game_manager.init_camera()
 
-# draw_keypoints({1: [[     237.73,      614.31,      0.9383],
-#        [     221.64,       628.3,     0.97267],
-#        [      222.8,       597.8,      0.9637],
-#        [     229.77,       651.9,     0.98263],
-#        [     233.48,      571.32,     0.96457],
-#        [     331.28,      697.38,     0.90198],
-#        [     327.52,      527.29,     0.86298],
-#        [      349.8,      821.66,     0.91605],
-#        [     351.32,      396.48,     0.93134],
-#        [     243.93,      818.38,     0.92239],
-#        [     238.85,      405.32,     0.92957],
-#        [      584.1,      653.63,     0.72214],
-#        [     579.19,      544.23,     0.70247],
-#        [     719.85,       658.9,      0.6968],
-#        [     718.88,      518.82,     0.64353],
-#        [     706.81,      653.92,     0.16169],
-#        [     698.87,       530.9,     0.12463]]})
+game_init = GameInitializer(game_manager, numer_players=1)
+print("#########################\n########  GAME  #########\n#########################\n",
+      game_init.init_game(starting_pose=GameInitializer.RAISING_HAND_POSE, threshold=30))
+
