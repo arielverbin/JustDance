@@ -9,6 +9,12 @@ import 'package:app/utils/service/init_py_native.dart';
 import 'package:app/pages/game_start.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
 import 'package:app/animations.dart';
+import 'package:app/pages/in_game_page.dart';
+
+import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+import 'package:fvp/fvp.dart' as fvp;
+import 'package:app/pages/in_game_page.dart';
 
 Future<void> initService = Future(() => null);
 

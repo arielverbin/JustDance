@@ -3,6 +3,7 @@ import 'package:app/pages/game_start.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'package:app/widgets/feedback_widget.dart';
+import 'package:app/pages/in_game_page.dart';
 
 class AnimationApp extends StatelessWidget {
   const AnimationApp({super.key});
@@ -84,7 +85,17 @@ class _AnimationsTestingState extends State<AnimationTesting> {
                     MaterialPageRoute(
                         builder: (context) => const GameStartPage()));
               },
-              child: const Text('Game Start'))
+              child: const Text('Game Start')),
+
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => InGamePage(songTitle: "dance1",
+                        numberOfPlayers: 2, playerNames: const ["Dodo", "Bobi"],)));
+              },
+              child: const Text('Video Player'))
         ],
       )),
     );
