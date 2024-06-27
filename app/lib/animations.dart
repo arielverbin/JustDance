@@ -1,8 +1,6 @@
-import 'dart:math';
-import 'package:app/pages/game_start.dart';
+import 'package:app/pages/game_start_page.dart';
+import 'package:app/pages/winner_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as flutter;
-import 'package:app/widgets/feedback_widget.dart';
 import 'package:app/pages/in_game_page.dart';
 
 class AnimationApp extends StatelessWidget {
@@ -20,21 +18,10 @@ class AnimationTesting extends StatefulWidget {
   const AnimationTesting({super.key});
 
   @override
-  _AnimationsTestingState createState() => _AnimationsTestingState();
+  AnimationsTestingState createState() => AnimationsTestingState();
 }
 
-class _AnimationsTestingState extends State<AnimationTesting> {
-  String _displayText = '';
-  Color _textColor = Colors.black;
-  int _uniqueKey = 0;
-
-  void _startAnimation(String text, Color color) {
-    setState(() {
-      _displayText = text;
-      _textColor = color;
-      _uniqueKey++; // Increment the unique key to force rebuild
-    });
-  }
+class AnimationsTestingState extends State<AnimationTesting> {
 
   @override
   Widget build(BuildContext context) {
@@ -44,40 +31,6 @@ class _AnimationsTestingState extends State<AnimationTesting> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (_displayText.isNotEmpty)
-            FeedbackWidget(
-              key: ValueKey(_uniqueKey), // Use the unique key
-              text: _displayText,
-              color: _textColor,
-            ),
-          const SizedBox(height: 20.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: () => _startAnimation('PERFECT', Colors.cyanAccent),
-                child: const Text('Perfect'),
-              ),
-              ElevatedButton(
-                onPressed: () => _startAnimation('GOOD', Colors.indigoAccent),
-                child: const Text('Good'),
-              ),
-              ElevatedButton(
-                onPressed: () => _startAnimation('OK', Colors.lightGreenAccent),
-                child: const Text('OK'),
-              ),
-              ElevatedButton(
-                onPressed: () => _startAnimation('NAH', Colors.orange),
-                child: const Text('Nah'),
-              ),
-              ElevatedButton(
-                onPressed: () => _startAnimation('X', Colors.redAccent),
-                child: const Text('X'),
-              ),
-            ],
-          ),
-
           ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -92,10 +45,22 @@ class _AnimationsTestingState extends State<AnimationTesting> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => InGamePage(songTitle: "dance1",
-                        numberOfPlayers: 2, playerNames: const ["Dodo", "Bobi"],)));
+                        builder: (context) => const InGamePage(songTitle: "random",
+                        numberOfPlayers: 2, playerNames: ["susan", "ava"],)));
               },
-              child: const Text('Video Player'))
+              child: const Text('Video Player')),
+
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => WinnerPage(
+                          scores : const [42340,245297],
+                          players: const ["susan", "liam"],)
+                    ));
+              },
+              child: const Text('Winner Page'))
         ],
       )),
     );

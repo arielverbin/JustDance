@@ -1,9 +1,5 @@
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
-import 'package:app/widgets/feedback_widget.dart';
-import 'package:path/path.dart';
 
 
 class GameStartPage extends StatelessWidget {
@@ -27,15 +23,11 @@ class GameStartPage extends StatelessWidget {
                 height: 100,
               ),
               const SizedBox(width: 25),
-              Column(
+              const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
-                  ), const SizedBox(height: 20,),
-                  const Text(
+                  Text(
                     "Stay In Frame!",
                     style: TextStyle(
                       fontSize: 30.0,
@@ -45,7 +37,7 @@ class GameStartPage extends StatelessWidget {
                       fontFamily: 'Poppins',
                     ),
                   ),
-                  const Text(
+                  Text(
                     "For accurate scoring, make sure that throughout the game\nall players are fully visible for the camera.",
                     style: TextStyle(
                       fontSize: 20.0,

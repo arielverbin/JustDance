@@ -82,11 +82,33 @@ class FeedbackWidgetState extends State<FeedbackWidget>
         child: Text(
           widget.text,
           style: TextStyle(
-              fontSize: 24.0,
-              color: widget.color,
+              fontSize: 34.0,
+              color: Colors.white,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w900,
-              fontStyle: FontStyle.italic),
+              fontStyle: FontStyle.italic,
+              shadows: <Shadow>[
+                Shadow(
+                  blurRadius: 30.0,
+                  color: widget.color,
+                  offset: const Offset(0, 0),
+                ),
+                Shadow(
+                  blurRadius: 30.0,
+                  color: widget.color,
+                  offset: const Offset(0, 0),
+                ),
+                Shadow(
+                  blurRadius: 40.0,
+                  color: widget.color,
+                  offset: const Offset(0, 0),
+                ),
+                Shadow(
+                  blurRadius: 40.0,
+                  color: widget.color,
+                  offset: const Offset(0, 0),
+                ),
+              ]),
         ),
       ),
     );
