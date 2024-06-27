@@ -25,7 +25,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void initState() {
     super.initState();
     // Initialize the video controller with a local asset video file
-    _controller = VideoPlayerController.asset('assets/videos/video5count.mp4')
+    _controller = VideoPlayerController.asset('assets/songs/random.mov')
       ..addListener(() {
         if (_isMounted) {
           if (!_isVideoFinished && _controller.value.position >= _controller.value.duration) {
