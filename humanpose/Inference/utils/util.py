@@ -1,5 +1,5 @@
 from Inference.configs.ViTPose_coco import model_base
-from typing import Tuple, Any
+from typing import Any
 
 import numpy as np
 

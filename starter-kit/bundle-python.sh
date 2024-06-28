@@ -41,7 +41,7 @@ workingDir=$(pwd)
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
   PYTHON=python
 else
-  PYTHON=python3
+  PYTHON=python3.10
 fi
 
 # Check the OS

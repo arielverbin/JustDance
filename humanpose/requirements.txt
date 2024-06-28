@@ -1,6 +1,5 @@
 opencv-python~=4.10.0.84
 grpcio
-opencv-python~=4.10.0.82
 grpcio-health-checking
 torch~=2.2.2
 ultralytics~=8.2.40

@@ -20,8 +20,8 @@ class GameInitializer:
 
         # For raising hands, we need to check if the following angles, are bigger/smaller than their critical angle.
         joints = [[8, 6, 12], [7, 5, 11],  # Lower Shoulder-Arms (left and right)
-                  [8, 6, 0], [7, 5, 0],    # Outer-Shoulder (left and right)
-                  [10, 8, 6], [9, 7, 5]]   # Arms (left and right)
+                  [8, 6, 0], [7, 5, 0],  # Outer-Shoulder (left and right)
+                  [10, 8, 6], [9, 7, 5]]  # Arms (left and right)
 
         checkers = [GameInitializer._get_angle_checker(bigger_than=True, critical_angle=120),
                     GameInitializer._get_angle_checker(bigger_than=True, critical_angle=120),
@@ -29,7 +29,8 @@ class GameInitializer:
                     GameInitializer._get_angle_checker(bigger_than=False, critical_angle=100),
                     GameInitializer._get_angle_checker(bigger_than=True, critical_angle=90),
                     GameInitializer._get_angle_checker(bigger_than=True, critical_angle=90)]
-        self.angles = zip(joints, checkers)
+
+        self.angles = list(zip(joints, checkers))
 
         self.players = []
 
@@ -92,15 +93,15 @@ class GameInitializer:
                 else:
                     confidence_count = 0
 
-            if len(players) == 0:
-                print("#")
-                print("#")
-            elif len(players) == 1:
-                print("#########################")
-                print("#########################")
-            else:
-                print("##################################################")
-                print("##################################################")
+            # if len(players) == 0:
+            #     print("#")
+            #     print("#")
+            # elif len(players) == 1:
+            #     print("#########################")
+            #     print("#########################")
+            # else:
+            #     print("##################################################")
+            #     print("##################################################")
 
     def cancel_game(self):
         """
