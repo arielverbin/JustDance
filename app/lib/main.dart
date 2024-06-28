@@ -5,8 +5,10 @@ import 'package:flutter/material.dart' as flutter;
 import 'package:app/pages/homepage.dart';
 import 'package:app/utils/service/client.dart';
 import 'package:app/utils/service/init_py.dart';
-import 'package:app/utils/service/init_py_native.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
+import 'package:app/animations.dart';
+
+import 'package:flutter/material.dart';
 
 Future<void> initService = Future(() => null);
 
@@ -14,7 +16,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   initService = initPy();
 
-  runApp(const MainApp());
+  runApp(const MainApp());  // Change back to MainApp!
 }
 
 class MainApp extends StatelessWidget {

@@ -1,4 +1,3 @@
-// widgets/song_card.dart
 import 'package:flutter/material.dart';
 
 class SongCard extends StatelessWidget {
@@ -22,59 +21,68 @@ class SongCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        height: MediaQuery.of(context).size.height - 100,
         decoration: BoxDecoration(
-          color: Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(10),
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: AssetImage(imageUrl), // Load the song's image
-          ),
+          color: const Color(0xFF0B1215),
+          borderRadius: BorderRadius.circular(30),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                Colors.black.withOpacity(0.7), // Background gradient for text
-              ],
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Container(
+                padding: const EdgeInsets.only(left: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      artist.toUpperCase(), // Display artist name
+                      style: const TextStyle(
+                        fontSize: 20.0,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    Text(
+                      title.toUpperCase(), // Display song title
+                      style: const TextStyle(
+                        fontSize: 40.0,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      'BEST SCORE: $bestScore', // Display best score
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title, // Display song title
-                  style: const TextStyle(
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(20.0), // Add margin around the image
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10), // Round the corners of the image
+                  child: Image.asset(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    height: double.infinity,
+                    width: double.infinity,
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                Text(
-                  'Artist: $artist', // Display artist name
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4.0),
-                Text(
-                  'Best Score: $bestScore', // Display best score
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
