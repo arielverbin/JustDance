@@ -4,8 +4,8 @@ from Comparasion.pose_score import PoseScore
 
 
 joints = [
-    # [16, 14, 12, 0.2],  # Knee 1
-    # [15, 13, 11, 0.2],  # Knee 2
+    [16, 14, 12, 0.2],  # Knee 1
+    [15, 13, 11, 0.2],  # Knee 2
     [14, 12, 11, 0.7],  # Lower Hip 1
     [13, 11, 12, 0.7],  # Lower Hip 2
     [6, 12, 14, 0.5],  # Outer Hip 1
@@ -23,16 +23,16 @@ joints = [
     [10, 8, 6, 1],  # Arm 1
     [9, 7, 5, 1],  # Arm 2
 
-    # [0, 6, 5, 0.5],  # Nose-Shoulder 1
-    # [0, 5, 6, 0.5],  # Nose-Shoulder 2
-    # [6, 0, 5, 0.3],  # Nose-Shoulders
+    [0, 6, 5, 0.5],  # Nose-Shoulder 1
+    [0, 5, 6, 0.5],  # Nose-Shoulder 2
+    [6, 0, 5, 0.3],  # Nose-Shoulders
 
-    # [1, 2, 0, 0.1],  # Eye-Nose 1
-    # [2, 1, 0, 0.1],  # Eye-Nose 2
-    # [2, 0, 1, 0.1],  # Eyes-Nose
-    #
-    # [1, 2, 4, 0.1],  # Eye-Ear 1
-    # [2, 1, 3, 0.1],  # Eye-Ear 2
+    [1, 2, 0, 0.1],  # Eye-Nose 1
+    [2, 1, 0, 0.1],  # Eye-Nose 2
+    [2, 0, 1, 0.1],  # Eyes-Nose
+
+    [1, 2, 4, 0.1],  # Eye-Ear 1
+    [2, 1, 3, 0.1],  # Eye-Ear 2
 ]
 
 
@@ -96,4 +96,3 @@ class AngularScore(PoseScore):
             return 10  # Nah
 
         return 0  # X
-

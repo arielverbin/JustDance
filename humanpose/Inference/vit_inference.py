@@ -15,7 +15,6 @@ from Inference.utils.util import pad_image
 from Inference.model.postprocess import keypoints_from_heatmaps
 from Inference.utils.util import dyn_model_import
 
-from Inference.utils.draw_utils import draw_bboxes, joints_dict, draw_points_and_skeleton
 
 try:  # Add bools -> error stack
     import pycuda.driver as cuda  # noqa: F401
@@ -165,7 +164,8 @@ class VitInference:
             dict: a 17-element array for each person with their predicted keypoints.
         """
         if img is not None:
-            self.update_tracker(img)
+            # Tracker is not used in a different thread, perform tracking here.
+            self.update_tracker(img, protect=[])
 
         frame_keypoints = {}
 
@@ -177,6 +177,7 @@ class VitInference:
             img = self.last_img
 
         if bboxes is None or img is None:
+            # Tracker is yet to track anyone.
             return frame_keypoints
 
         pad_bbox = 10

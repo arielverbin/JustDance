@@ -16,12 +16,17 @@ class ScoringPoseServiceStub(object):
         """
         self.loadService = channel.unary_unary(
                 '/ScoringPoseService/loadService',
-                request_serializer=service__pb2.LoadData.SerializeToString,
+                request_serializer=service__pb2.EmptyMessage.SerializeToString,
                 response_deserializer=service__pb2.LoadStatus.FromString,
                 )
         self.loadGame = channel.unary_unary(
                 '/ScoringPoseService/loadGame',
                 request_serializer=service__pb2.GameRequest.SerializeToString,
+                response_deserializer=service__pb2.GameStatus.FromString,
+                )
+        self.startGame = channel.unary_unary(
+                '/ScoringPoseService/startGame',
+                request_serializer=service__pb2.EmptyMessage.SerializeToString,
                 response_deserializer=service__pb2.GameStatus.FromString,
                 )
         self.getScore = channel.unary_unary(
@@ -51,6 +56,12 @@ class ScoringPoseService(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def startGame(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def getScore(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -68,12 +79,17 @@ def add_ScoringPoseServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'loadService': grpc.unary_unary_rpc_method_handler(
                     servicer.loadService,
-                    request_deserializer=service__pb2.LoadData.FromString,
+                    request_deserializer=service__pb2.EmptyMessage.FromString,
                     response_serializer=service__pb2.LoadStatus.SerializeToString,
             ),
             'loadGame': grpc.unary_unary_rpc_method_handler(
                     servicer.loadGame,
                     request_deserializer=service__pb2.GameRequest.FromString,
+                    response_serializer=service__pb2.GameStatus.SerializeToString,
+            ),
+            'startGame': grpc.unary_unary_rpc_method_handler(
+                    servicer.startGame,
+                    request_deserializer=service__pb2.EmptyMessage.FromString,
                     response_serializer=service__pb2.GameStatus.SerializeToString,
             ),
             'getScore': grpc.unary_unary_rpc_method_handler(

@@ -13,13 +13,22 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-class LoadData extends $pb.GeneratedMessage {
-  factory LoadData() => create();
-  LoadData._() : super();
-  factory LoadData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory LoadData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+class EmptyMessage extends $pb.GeneratedMessage {
+  factory EmptyMessage({
+    $core.String? status,
+  }) {
+    final $result = create();
+    if (status != null) {
+      $result.status = status;
+    }
+    return $result;
+  }
+  EmptyMessage._() : super();
+  factory EmptyMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory EmptyMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'LoadData', createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EmptyMessage', createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'status')
     ..hasRequiredFields = false
   ;
 
@@ -27,22 +36,31 @@ class LoadData extends $pb.GeneratedMessage {
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  LoadData clone() => LoadData()..mergeFromMessage(this);
+  EmptyMessage clone() => EmptyMessage()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  LoadData copyWith(void Function(LoadData) updates) => super.copyWith((message) => updates(message as LoadData)) as LoadData;
+  EmptyMessage copyWith(void Function(EmptyMessage) updates) => super.copyWith((message) => updates(message as EmptyMessage)) as EmptyMessage;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static LoadData create() => LoadData._();
-  LoadData createEmptyInstance() => create();
-  static $pb.PbList<LoadData> createRepeated() => $pb.PbList<LoadData>();
+  static EmptyMessage create() => EmptyMessage._();
+  EmptyMessage createEmptyInstance() => create();
+  static $pb.PbList<EmptyMessage> createRepeated() => $pb.PbList<EmptyMessage>();
   @$core.pragma('dart2js:noInline')
-  static LoadData getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<LoadData>(create);
-  static LoadData? _defaultInstance;
+  static EmptyMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EmptyMessage>(create);
+  static EmptyMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get status => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set status($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => clearField(1);
 }
 
 class LoadStatus extends $pb.GeneratedMessage {
@@ -175,9 +193,13 @@ class GameRequest extends $pb.GeneratedMessage {
 
 class GameStatus extends $pb.GeneratedMessage {
   factory GameStatus({
+    $core.int? numberOfPlayers,
     $core.String? status,
   }) {
     final $result = create();
+    if (numberOfPlayers != null) {
+      $result.numberOfPlayers = numberOfPlayers;
+    }
     if (status != null) {
       $result.status = status;
     }
@@ -188,7 +210,8 @@ class GameStatus extends $pb.GeneratedMessage {
   factory GameStatus.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GameStatus', createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'status')
+    ..a<$core.int>(1, _omitFieldNames ? '' : 'numberOfPlayers', $pb.PbFieldType.O3, protoName: 'numberOfPlayers')
+    ..aOS(2, _omitFieldNames ? '' : 'status')
     ..hasRequiredFields = false
   ;
 
@@ -214,13 +237,22 @@ class GameStatus extends $pb.GeneratedMessage {
   static GameStatus? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get status => $_getSZ(0);
+  $core.int get numberOfPlayers => $_getIZ(0);
   @$pb.TagNumber(1)
-  set status($core.String v) { $_setString(0, v); }
+  set numberOfPlayers($core.int v) { $_setSignedInt32(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasStatus() => $_has(0);
+  $core.bool hasNumberOfPlayers() => $_has(0);
   @$pb.TagNumber(1)
-  void clearStatus() => clearField(1);
+  void clearNumberOfPlayers() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get status => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set status($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasStatus() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStatus() => clearField(2);
 }
 
 class TimeRequest extends $pb.GeneratedMessage {

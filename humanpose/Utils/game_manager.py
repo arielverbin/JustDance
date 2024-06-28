@@ -5,6 +5,7 @@ import cv2
 class GameManager:
     """
     This class is responsible for the communication between the threads of the algorithm, and the flutter app.
+    It includes crucial information about the game's state.
     """
 
     def __init__(self, inference_model):
@@ -18,9 +19,13 @@ class GameManager:
 
         self.capture = None
         self.model = inference_model
+        self.num_players = None
         self.players = None
 
     def init_camera(self):
+        """
+        Inits the camera resource for the game.
+        """
         self.capture = cv2.VideoCapture(0)
 
     def start_game(self, players):
@@ -70,6 +75,9 @@ class GameManager:
             return score
 
     def get_players(self):
+        """
+        Returns which tracker indexes are the current players.
+        """
         return self.players
 
     def update_score(self, score):
@@ -83,16 +91,24 @@ class GameManager:
             self.score_condition.notify_all()
 
     def get_inference_model(self):
+        """
+        Returns a reference to the machine learning model that is being used.
+        """
         return self.model
 
     def get_camera_access(self):
+        """
+        Returns a reference of the camera resource.
+        """
         return self.capture
 
     def reset(self):
         """
         Resets the game manager for the next game.
+        Should be called after every cancellation or termination of a game.
         """
         self.players = None
+        self.num_players = None
         self.capture.release()
         self.capture = None
         cv2.destroyAllWindows()

@@ -13,14 +13,17 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
-@$core.Deprecated('Use loadDataDescriptor instead')
-const LoadData$json = {
-  '1': 'LoadData',
+@$core.Deprecated('Use emptyMessageDescriptor instead')
+const EmptyMessage$json = {
+  '1': 'EmptyMessage',
+  '2': [
+    {'1': 'status', '3': 1, '4': 1, '5': 9, '10': 'status'},
+  ],
 };
 
-/// Descriptor for `LoadData`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List loadDataDescriptor = $convert.base64Decode(
-    'CghMb2FkRGF0YQ==');
+/// Descriptor for `EmptyMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List emptyMessageDescriptor = $convert.base64Decode(
+    'CgxFbXB0eU1lc3NhZ2USFgoGc3RhdHVzGAEgASgJUgZzdGF0dXM=');
 
 @$core.Deprecated('Use loadStatusDescriptor instead')
 const LoadStatus$json = {
@@ -54,13 +57,15 @@ final $typed_data.Uint8List gameRequestDescriptor = $convert.base64Decode(
 const GameStatus$json = {
   '1': 'GameStatus',
   '2': [
-    {'1': 'status', '3': 1, '4': 1, '5': 9, '10': 'status'},
+    {'1': 'numberOfPlayers', '3': 1, '4': 1, '5': 5, '10': 'numberOfPlayers'},
+    {'1': 'status', '3': 2, '4': 1, '5': 9, '10': 'status'},
   ],
 };
 
 /// Descriptor for `GameStatus`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List gameStatusDescriptor = $convert.base64Decode(
-    'CgpHYW1lU3RhdHVzEhYKBnN0YXR1cxgBIAEoCVIGc3RhdHVz');
+    'CgpHYW1lU3RhdHVzEigKD251bWJlck9mUGxheWVycxgBIAEoBVIPbnVtYmVyT2ZQbGF5ZXJzEh'
+    'YKBnN0YXR1cxgCIAEoCVIGc3RhdHVz');
 
 @$core.Deprecated('Use timeRequestDescriptor instead')
 const TimeRequest$json = {

@@ -10,13 +10,16 @@ def track_players(game_manager):
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference.model()
-    players = game_manager.get_players()
+    players = None
     capture = game_manager.get_camera_access()
 
     while True:
         ret, img = capture.read()
 
         game_manager.wait_for_game_start()
+
+        if players is None:
+            players = game_manager.get_players()
 
         if not ret:
             print("Error: Could not read frame from camera.")
@@ -44,14 +47,17 @@ def score_dance(comparator, score_controller, game_manager):
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference.model()
-    players = game_manager.get_players()
 
+    players = None
     start_time = None
 
     while True:
 
         # Waits for game to start.
         game_manager.wait_for_game_start()
+
+        if players is None:
+            players = game_manager.get_players()
 
         # Inference keypoints of every person in the frame.
         keypoints = model.inference()

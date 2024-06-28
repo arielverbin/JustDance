@@ -21,13 +21,17 @@ export 'service.pb.dart';
 
 @$pb.GrpcServiceName('ScoringPoseService')
 class ScoringPoseServiceClient extends $grpc.Client {
-  static final _$loadService = $grpc.ClientMethod<$0.LoadData, $0.LoadStatus>(
+  static final _$loadService = $grpc.ClientMethod<$0.EmptyMessage, $0.LoadStatus>(
       '/ScoringPoseService/loadService',
-      ($0.LoadData value) => value.writeToBuffer(),
+      ($0.EmptyMessage value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.LoadStatus.fromBuffer(value));
   static final _$loadGame = $grpc.ClientMethod<$0.GameRequest, $0.GameStatus>(
       '/ScoringPoseService/loadGame',
       ($0.GameRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $0.GameStatus.fromBuffer(value));
+  static final _$startGame = $grpc.ClientMethod<$0.EmptyMessage, $0.GameStatus>(
+      '/ScoringPoseService/startGame',
+      ($0.EmptyMessage value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.GameStatus.fromBuffer(value));
   static final _$getScore = $grpc.ClientMethod<$0.TimeRequest, $0.ScoreResponse>(
       '/ScoringPoseService/getScore',
@@ -44,12 +48,16 @@ class ScoringPoseServiceClient extends $grpc.Client {
       : super(channel, options: options,
         interceptors: interceptors);
 
-  $grpc.ResponseFuture<$0.LoadStatus> loadService($0.LoadData request, {$grpc.CallOptions? options}) {
+  $grpc.ResponseFuture<$0.LoadStatus> loadService($0.EmptyMessage request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$loadService, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.GameStatus> loadGame($0.GameRequest request, {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$loadGame, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.GameStatus> startGame($0.EmptyMessage request, {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$startGame, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.ScoreResponse> getScore($0.TimeRequest request, {$grpc.CallOptions? options}) {
@@ -66,12 +74,12 @@ abstract class ScoringPoseServiceBase extends $grpc.Service {
   $core.String get $name => 'ScoringPoseService';
 
   ScoringPoseServiceBase() {
-    $addMethod($grpc.ServiceMethod<$0.LoadData, $0.LoadStatus>(
+    $addMethod($grpc.ServiceMethod<$0.EmptyMessage, $0.LoadStatus>(
         'loadService',
         loadService_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $0.LoadData.fromBuffer(value),
+        ($core.List<$core.int> value) => $0.EmptyMessage.fromBuffer(value),
         ($0.LoadStatus value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.GameRequest, $0.GameStatus>(
         'loadGame',
@@ -79,6 +87,13 @@ abstract class ScoringPoseServiceBase extends $grpc.Service {
         false,
         false,
         ($core.List<$core.int> value) => $0.GameRequest.fromBuffer(value),
+        ($0.GameStatus value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.EmptyMessage, $0.GameStatus>(
+        'startGame',
+        startGame_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.EmptyMessage.fromBuffer(value),
         ($0.GameStatus value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.TimeRequest, $0.ScoreResponse>(
         'getScore',
@@ -96,12 +111,16 @@ abstract class ScoringPoseServiceBase extends $grpc.Service {
         ($0.EndStatus value) => value.writeToBuffer()));
   }
 
-  $async.Future<$0.LoadStatus> loadService_Pre($grpc.ServiceCall call, $async.Future<$0.LoadData> request) async {
+  $async.Future<$0.LoadStatus> loadService_Pre($grpc.ServiceCall call, $async.Future<$0.EmptyMessage> request) async {
     return loadService(call, await request);
   }
 
   $async.Future<$0.GameStatus> loadGame_Pre($grpc.ServiceCall call, $async.Future<$0.GameRequest> request) async {
     return loadGame(call, await request);
+  }
+
+  $async.Future<$0.GameStatus> startGame_Pre($grpc.ServiceCall call, $async.Future<$0.EmptyMessage> request) async {
+    return startGame(call, await request);
   }
 
   $async.Future<$0.ScoreResponse> getScore_Pre($grpc.ServiceCall call, $async.Future<$0.TimeRequest> request) async {
@@ -112,8 +131,9 @@ abstract class ScoringPoseServiceBase extends $grpc.Service {
     return endGame(call, await request);
   }
 
-  $async.Future<$0.LoadStatus> loadService($grpc.ServiceCall call, $0.LoadData request);
+  $async.Future<$0.LoadStatus> loadService($grpc.ServiceCall call, $0.EmptyMessage request);
   $async.Future<$0.GameStatus> loadGame($grpc.ServiceCall call, $0.GameRequest request);
+  $async.Future<$0.GameStatus> startGame($grpc.ServiceCall call, $0.EmptyMessage request);
   $async.Future<$0.ScoreResponse> getScore($grpc.ServiceCall call, $0.TimeRequest request);
   $async.Future<$0.EndStatus> endGame($grpc.ServiceCall call, $0.EndRequest request);
 }
