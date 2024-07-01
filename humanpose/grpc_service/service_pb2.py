@@ -13,46 +13,62 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\rservice.proto\"\n\n\x08loadData\"\x1c\n\nloadStatus\x12\x0e\n\x06status\x18\x01 \x01('
-    b'\t\"V\n\x05Image\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x0e\n\x06\x66ormat\x18\x02 \x01('
-    b'\t\x12\r\n\x05width\x18\x03 \x01(\x05\x12\x0e\n\x06height\x18\x04 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x05 '
-    b'\x01(\x0c\"3\n\x0cImageRequest\x12\x15\n\x05image\x18\x01 \x01(\x0b\x32\x06.Image\x12\x0c\n\x04time\x18\x02 '
-    b'\x01(\x05\",\n\rScoreResponse\x12\r\n\x05score\x18\x01 \x01(\x01\x12\x0c\n\x04time\x18\x02 \x01('
-    b'\x05\x32j\n\x12ScoringPoseService\x12\'\n\x0bloadService\x12\t.loadData\x1a\x0b.loadStatus\"\x00\x12+\n'
-    b'\x08getScore\x12\r.ImageRequest\x1a\x0e.ScoreResponse\"\x00\x62\x06proto3')
+    b'\n\rservice.proto\"\x1e\n\x0c\x45mptyMessage\x12\x0e\n\x06status\x18\x01 \x01('
+    b'\t\"\x1c\n\nLoadStatus\x12\x0e\n\x06status\x18\x01 \x01(\t\"L\n\x0bGameRequest\x12\x11\n\tsongTitle\x18\x01 '
+    b'\x01(\t\x12\x17\n\x0fnumberOfPlayers\x18\x02 \x01(\x05\x12\x11\n\tgameSpeed\x18\x03 \x01('
+    b'\x05\"5\n\nGameStatus\x12\x17\n\x0fnumberOfPlayers\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01('
+    b'\t\"\x1b\n\x0bTimeRequest\x12\x0c\n\x04time\x18\x01 \x01(\x05\"Y\n\rScoreResponse\x12\x0e\n\x06score1\x18\x01 '
+    b'\x01(\x05\x12\x13\n\x0btotalScore1\x18\x03 \x01(\x05\x12\x0e\n\x06score2\x18\x02 \x01('
+    b'\x05\x12\x13\n\x0btotalScore2\x18\x04 \x01(\x05\"\x0c\n\nEndRequest\"U\n\tEndStatus\x12\x0e\n\x06status\x18\x01 '
+    b'\x01(\t\x12\x0e\n\x06winner\x18\x02 \x01(\x05\x12\x13\n\x0btotalScore1\x18\x03 \x01('
+    b'\x05\x12\x13\n\x0btotalScore2\x18\x04 \x01('
+    b'\x05\x32\xe7\x01\n\x12ScoringPoseService\x12+\n\x0bloadService\x12\r.EmptyMessage\x1a\x0b.LoadStatus\"\x00\x12'
+    b'\'\n\x08loadGame\x12\x0c.GameRequest\x1a\x0b.GameStatus\"\x00\x12)\n\tstartGame\x12\r.EmptyMessage\x1a\x0b'
+    b'.GameStatus\"\x00\x12*\n\x08getScore\x12\x0c.TimeRequest\x1a\x0e.ScoreResponse\"\x00\x12$\n\x07\x65ndGame\x12'
+    b'\x0b.EndRequest\x1a\n.EndStatus\"\x00\x62\x06proto3')
 
-_LOADDATA = DESCRIPTOR.message_types_by_name['loadData']
-_LOADSTATUS = DESCRIPTOR.message_types_by_name['loadStatus']
-_IMAGE = DESCRIPTOR.message_types_by_name['Image']
-_IMAGEREQUEST = DESCRIPTOR.message_types_by_name['ImageRequest']
+_EMPTYMESSAGE = DESCRIPTOR.message_types_by_name['EmptyMessage']
+_LOADSTATUS = DESCRIPTOR.message_types_by_name['LoadStatus']
+_GAMEREQUEST = DESCRIPTOR.message_types_by_name['GameRequest']
+_GAMESTATUS = DESCRIPTOR.message_types_by_name['GameStatus']
+_TIMEREQUEST = DESCRIPTOR.message_types_by_name['TimeRequest']
 _SCORERESPONSE = DESCRIPTOR.message_types_by_name['ScoreResponse']
-loadData = _reflection.GeneratedProtocolMessageType('loadData', (_message.Message,), {
-    'DESCRIPTOR': _LOADDATA,
+_ENDREQUEST = DESCRIPTOR.message_types_by_name['EndRequest']
+_ENDSTATUS = DESCRIPTOR.message_types_by_name['EndStatus']
+EmptyMessage = _reflection.GeneratedProtocolMessageType('EmptyMessage', (_message.Message,), {
+    'DESCRIPTOR': _EMPTYMESSAGE,
     '__module__': 'service_pb2'
-    # @@protoc_insertion_point(class_scope:loadData)
+    # @@protoc_insertion_point(class_scope:EmptyMessage)
 })
-_sym_db.RegisterMessage(loadData)
+_sym_db.RegisterMessage(EmptyMessage)
 
-loadStatus = _reflection.GeneratedProtocolMessageType('loadStatus', (_message.Message,), {
+LoadStatus = _reflection.GeneratedProtocolMessageType('LoadStatus', (_message.Message,), {
     'DESCRIPTOR': _LOADSTATUS,
     '__module__': 'service_pb2'
-    # @@protoc_insertion_point(class_scope:loadStatus)
+    # @@protoc_insertion_point(class_scope:LoadStatus)
 })
-_sym_db.RegisterMessage(loadStatus)
+_sym_db.RegisterMessage(LoadStatus)
 
-Image = _reflection.GeneratedProtocolMessageType('Image', (_message.Message,), {
-    'DESCRIPTOR': _IMAGE,
+GameRequest = _reflection.GeneratedProtocolMessageType('GameRequest', (_message.Message,), {
+    'DESCRIPTOR': _GAMEREQUEST,
     '__module__': 'service_pb2'
-    # @@protoc_insertion_point(class_scope:Image)
+    # @@protoc_insertion_point(class_scope:GameRequest)
 })
-_sym_db.RegisterMessage(Image)
+_sym_db.RegisterMessage(GameRequest)
 
-ImageRequest = _reflection.GeneratedProtocolMessageType('ImageRequest', (_message.Message,), {
-    'DESCRIPTOR': _IMAGEREQUEST,
+GameStatus = _reflection.GeneratedProtocolMessageType('GameStatus', (_message.Message,), {
+    'DESCRIPTOR': _GAMESTATUS,
     '__module__': 'service_pb2'
-    # @@protoc_insertion_point(class_scope:ImageRequest)
+    # @@protoc_insertion_point(class_scope:GameStatus)
 })
-_sym_db.RegisterMessage(ImageRequest)
+_sym_db.RegisterMessage(GameStatus)
+
+TimeRequest = _reflection.GeneratedProtocolMessageType('TimeRequest', (_message.Message,), {
+    'DESCRIPTOR': _TIMEREQUEST,
+    '__module__': 'service_pb2'
+    # @@protoc_insertion_point(class_scope:TimeRequest)
+})
+_sym_db.RegisterMessage(TimeRequest)
 
 ScoreResponse = _reflection.GeneratedProtocolMessageType('ScoreResponse', (_message.Message,), {
     'DESCRIPTOR': _SCORERESPONSE,
@@ -61,19 +77,39 @@ ScoreResponse = _reflection.GeneratedProtocolMessageType('ScoreResponse', (_mess
 })
 _sym_db.RegisterMessage(ScoreResponse)
 
+EndRequest = _reflection.GeneratedProtocolMessageType('EndRequest', (_message.Message,), {
+    'DESCRIPTOR': _ENDREQUEST,
+    '__module__': 'service_pb2'
+    # @@protoc_insertion_point(class_scope:EndRequest)
+})
+_sym_db.RegisterMessage(EndRequest)
+
+EndStatus = _reflection.GeneratedProtocolMessageType('EndStatus', (_message.Message,), {
+    'DESCRIPTOR': _ENDSTATUS,
+    '__module__': 'service_pb2'
+    # @@protoc_insertion_point(class_scope:EndStatus)
+})
+_sym_db.RegisterMessage(EndStatus)
+
 _SCORINGPOSESERVICE = DESCRIPTOR.services_by_name['ScoringPoseService']
-if not _descriptor._USE_C_DESCRIPTORS:
+if _descriptor._USE_C_DESCRIPTORS == False:
     DESCRIPTOR._options = None
-    _LOADDATA._serialized_start = 17
-    _LOADDATA._serialized_end = 27
-    _LOADSTATUS._serialized_start = 29
-    _LOADSTATUS._serialized_end = 57
-    _IMAGE._serialized_start = 59
-    _IMAGE._serialized_end = 145
-    _IMAGEREQUEST._serialized_start = 147
-    _IMAGEREQUEST._serialized_end = 198
-    _SCORERESPONSE._serialized_start = 200
-    _SCORERESPONSE._serialized_end = 244
-    _SCORINGPOSESERVICE._serialized_start = 246
-    _SCORINGPOSESERVICE._serialized_end = 352
+    _EMPTYMESSAGE._serialized_start = 17
+    _EMPTYMESSAGE._serialized_end = 47
+    _LOADSTATUS._serialized_start = 49
+    _LOADSTATUS._serialized_end = 77
+    _GAMEREQUEST._serialized_start = 79
+    _GAMEREQUEST._serialized_end = 155
+    _GAMESTATUS._serialized_start = 157
+    _GAMESTATUS._serialized_end = 210
+    _TIMEREQUEST._serialized_start = 212
+    _TIMEREQUEST._serialized_end = 239
+    _SCORERESPONSE._serialized_start = 241
+    _SCORERESPONSE._serialized_end = 330
+    _ENDREQUEST._serialized_start = 332
+    _ENDREQUEST._serialized_end = 344
+    _ENDSTATUS._serialized_start = 346
+    _ENDSTATUS._serialized_end = 431
+    _SCORINGPOSESERVICE._serialized_start = 434
+    _SCORINGPOSESERVICE._serialized_end = 665
 # @@protoc_insertion_point(module_scope)

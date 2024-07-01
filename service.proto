@@ -1,30 +1,49 @@
 syntax = "proto3";
 
 service ScoringPoseService {
-  rpc loadService (loadData) returns (loadStatus) {}
-  rpc getScore (ImageRequest) returns (ScoreResponse) {}
+  rpc loadService (EmptyMessage) returns (LoadStatus) {}
+  rpc loadGame (GameRequest) returns (GameStatus) {}
+  rpc startGame (EmptyMessage) returns (GameStatus) {}
+  rpc getScore (TimeRequest) returns (ScoreResponse) {}
+  rpc endGame (EndRequest) returns (EndStatus) {}
 }
 
-message loadData {}
-
-message loadStatus {
+message EmptyMessage {
   string status = 1;
 }
 
-message Image {
-  string filename = 1;
-  string format = 2;
-  int32 width = 3;
-  int32 height = 4;
-  bytes data = 5;
+message LoadStatus {
+  string status = 1;
 }
 
-message ImageRequest {
-  Image image = 1;
-  int32 time = 2;
+message GameRequest {
+  string songTitle = 1;
+  int32 numberOfPlayers = 2;
+  int32 gameSpeed = 3;
+}
+
+message GameStatus {
+  int32 numberOfPlayers = 1;
+  string status = 2;
+}
+
+
+message TimeRequest {
+  int32 time = 1;
 }
 
 message ScoreResponse {
-  double score = 1;
-  int32 time = 2;
+  int32 score1 = 1;
+  int32 totalScore1 = 3;
+  int32 score2 = 2;
+  int32 totalScore2 = 4;
+}
+
+message EndRequest {}
+
+message EndStatus {
+  string status = 1;
+  int32 winner = 2;
+  int32 totalScore1 = 3;
+  int32 totalScore2 = 4;
 }

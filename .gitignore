@@ -1,4 +1,8 @@
 .DS_Store
-*.mov
+__pycache__/
 env
-__pycache__
+.idea
+.starterDependenciesInstalled
+vitpose-b-coco.pth
+yolov5su.pt
+*.mov
