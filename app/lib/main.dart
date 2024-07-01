@@ -41,7 +41,7 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
   late AnimationController _controller;
   late Animation<double> _animation;
   var _loadText = "Loading...";
-  Future<loadStatus> _loadStatus = Future(() => loadStatus());
+  Future<LoadStatus> _loadStatus = Future(() => LoadStatus());
 
   @override
   /// Initializes the animation controllers,
@@ -63,7 +63,7 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
   Future<void> loadService() async {
     try {
       await initService; // wait for server to start.
-      _loadStatus = ScoringPoseServiceClient(getClientChannel()).loadService(loadData());
+      _loadStatus = ScoringPoseServiceClient(getClientChannel()).loadService(EmptyMessage(status: ""));
       if ((await _loadStatus).status == 'success') {
         navigateToHomePageIfReady();
       } else {log((await _loadStatus).status);}
