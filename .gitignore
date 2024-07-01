@@ -5,3 +5,4 @@ env
 .starterDependenciesInstalled
 vitpose-b-coco.pth
 yolov5su.pt
+*.mov

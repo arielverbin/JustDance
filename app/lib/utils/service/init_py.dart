@@ -22,13 +22,13 @@ Future<void> initPy([bool doNoStartPy = false]) async {
 }
 
 Future<void> _waitForServer() async {
-  var client = HealthClient(getClientChannel());
+  var cleint = HealthClient(getClientChannel());
   var request = HealthCheckRequest();
   var started = false;
 
   for (var i = 0; i < 30; i++) {
     try {
-      var r = await client.check(request);
+      var r = await cleint.check(request);
 
       if (r.status == HealthCheckResponse_ServingStatus.SERVING) {
         started = true;

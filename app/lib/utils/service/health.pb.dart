@@ -13,9 +13,9 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import './health.pbenum.dart';
+import 'health.pbenum.dart';
 
-export './health.pbenum.dart';
+export 'health.pbenum.dart';
 
 class HealthCheckRequest extends $pb.GeneratedMessage {
   factory HealthCheckRequest({
