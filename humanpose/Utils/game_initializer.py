@@ -23,12 +23,12 @@ class GameInitializer:
                   [8, 6, 0], [7, 5, 0],  # Outer-Shoulder (left and right)
                   [10, 8, 6], [9, 7, 5]]  # Arms (left and right)
 
-        checkers = [GameInitializer._get_angle_checker(bigger_than=True, critical_angle=120),
-                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=120),
-                    GameInitializer._get_angle_checker(bigger_than=False, critical_angle=100),
-                    GameInitializer._get_angle_checker(bigger_than=False, critical_angle=100),
-                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=90),
-                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=90)]
+        checkers = [GameInitializer._get_angle_checker(bigger_than=True, critical_angle=100),
+                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=100),
+                    GameInitializer._get_angle_checker(bigger_than=False, critical_angle=120),
+                    GameInitializer._get_angle_checker(bigger_than=False, critical_angle=120),
+                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=70),
+                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=70)]
 
         self.angles = list(zip(joints, checkers))
 

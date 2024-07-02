@@ -1,25 +1,14 @@
+import 'dart:async';
+
 import 'package:app/pages/game_start_page.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:app/widgets/song_card.dart';
 import 'package:app/widgets/settings_widget.dart';
+import 'package:app/utils/service/service.pbgrpc.dart';
+import 'package:app/utils/service/client.dart';
+import 'package:app/widgets/alert_widget.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomePage(),
-    );
-  }
-}
-
-// Define a class for songs with title, artist, best score, and image URL
 class Song {
   String title;
   String artist;
@@ -37,8 +26,11 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final GlobalKey<HomePageState> _homepageKey = GlobalKey();
   late CarouselController _carouselController;
   late int numberOfPlayers;
+  late bool gameStarted = false;
+
 
   @override
   void initState() {
@@ -47,9 +39,67 @@ class HomePageState extends State<HomePage> {
     _carouselController = CarouselController();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _onNumberOfPlayersChanged(int newNumberOfPlayers) {
     setState(() {
       numberOfPlayers = newNumberOfPlayers;
+    });
+  }
+
+  void _showError(String title, String content) {
+    AlertWidget.showError(
+      context,
+      AlertWidget(
+        icon: const Icon(Icons.warning_amber_rounded,
+            color: Colors.white, size: 40.0),
+        color: Colors.redAccent,
+        title: title,
+        content: content,
+        duration: 2,
+      ),
+    );
+  }
+
+  Future<void> _loadGameAndStart(BuildContext context, Song song) async {
+    if(gameStarted) return;
+
+    setState(() { gameStarted = true; });
+    final gameRequest = GameRequest(
+      songTitle: song.title,
+      numberOfPlayers: numberOfPlayers,
+      gameSpeed: 1,
+    );
+
+    ScoringPoseServiceClient(getClientChannel()).loadGame(gameRequest)
+        .then((response) {
+
+      if (response.status == "waiting") {
+        // loading succeeded, game is waiting for players.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameStartPage(
+              numberOfPlayers: numberOfPlayers,
+              playerNames: const ['susan', 'noah'],
+              songTitle: song.title,
+            ),
+          ),
+        ).then((res) {
+          setState(() {
+            gameStarted = false;
+          });
+
+        });
+
+      } else {
+        gameStarted = false;
+        _showError("Song Not Found",
+            "The chosen song could not be found, try selecting a different one.");
+      }
     });
   }
 
@@ -65,20 +115,20 @@ class HomePageState extends State<HomePage> {
     ];
 
     return Scaffold(
+      key: _homepageKey,
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Opacity(
-              opacity: 0.3, // Set the desired opacity here
+              opacity: 0.3,
               child: Image.asset(
                 'assets/images/background.png',
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Background Carousel Slider taking most of the screen
+
           Padding(
             padding: const EdgeInsets.only(left: 350.0, right: 20.0),
             // Adjusted padding
@@ -101,50 +151,36 @@ class HomePageState extends State<HomePage> {
                       bestScore: songs[itemIndex].bestScore,
                       imageUrl: songs[itemIndex].imageUrl,
                       onTap: () {
-                        // Call the loadSongService function when a song is tapped
-                        // Navigate to InGamePage and pass the song title as an argument
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GameStartPage(
-                              numberOfPlayers: numberOfPlayers,
-                              playerNames: const ['susan', 'noah'],
-                              songTitle: songs[itemIndex].title,
-                            ),
-                          ),
-                        );
+                        _loadGameAndStart(context, songs[itemIndex]);
                       },
                     );
                   },
                   options: CarouselOptions(
                     height: MediaQuery.of(context).size.height,
-                    // Adjust the height to fit the screen
                     viewportFraction: 0.8,
-                    // Fraction of the viewport to occupy
                     enlargeCenterPage: true,
                     aspectRatio: 1 / 1,
-                    // Aspect ratio for the carousel items
                     onPageChanged: (index, reason) {
-                      // Callback for page change, add functionality if needed
+                      // TODO: add sound effect :)
                     },
                     scrollDirection:
-                    Axis.vertical, // Vertical scrolling for carousel
+                        Axis.vertical,
                   ),
                 )),
           ),
 
           // Just Dance logo on the top left corner
           Positioned(
-              left: (300 - 150 - 60) / 2,
+              left: (350 - 150 - 60) / 2,
               // SongCard's margin from left, logo's width.
-              top: (300 - 150 - 60) / 2,
+              top: (350 - 150 - 60) / 2,
               child: Column(
                 children: [
                   Image.asset(
-                    'assets/images/jd-logo.png', // Path to Just Dance logo
+                    'assets/images/jd-logo.png',
                     width: 150,
                   ),
-                  const SizedBox(height: 30,),
+                  const SizedBox( height: 30,),
                   SettingWidget(
                     numberOfPlayers: numberOfPlayers,
                     onNumberOfPlayersChanged: _onNumberOfPlayersChanged,

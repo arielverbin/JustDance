@@ -1,3 +1,5 @@
+import time
+
 from Utils.load_utils import load_from
 from Utils.game_manager import GameManager
 from Utils.game_utils import track_players, score_dance
@@ -22,6 +24,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.tracking_thread = None
         self.game_init_thread = None
         self.game_initializer = None
+        self.loaded = False
+        self.song_list = ["random"]
 
     def loadService(self, request, context):
         """
@@ -29,15 +33,20 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         Returns:
             LoadStatus: load status ('success' if the loading was successful)
         """
-        model_path = './Inference/weights/vitpose-b-coco.pth'
-        yolo_path = './Inference/weights/yolov5su.pt'
-        try:
-            self.model = VitInference(model_path, yolo_path)
-            self.game_manager = GameManager(inference_model=self.model)
+        print(f"[LOG] Received loadService.")
+        if not self.loaded:
+            model_path = './Inference/weights/vitpose-b-coco.pth'
+            yolo_path = './Inference/weights/yolov5su.pt'
+            try:
+                self.model = VitInference(model_path, yolo_path)
+                self.game_manager = GameManager(inference_model=self.model)
+                self.loaded = True
+            except Exception as e:
+                return service_pb2.LoadStatus(status=f"Error: {str(e)}")
 
-        except Exception as e:
-            return service_pb2.LoadStatus(status=f"Error: {str(e)}")
-
+        time.sleep(3)
+        print(f"[LOG] DONE with loadService.")
+        print("-----------------------------------------")
         return service_pb2.LoadStatus(status="success")
 
     def loadGame(self, request, context):
@@ -46,18 +55,28 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         Returns:
             GameStatus: status of game initialization ('running' if the game was loaded successfully)
         """
+        print(f"[LOG] Received loadGame. "
+              f"Request: [numOfPlayers: {request.numberOfPlayers}, songTitle: {request.songTitle}]")
+
+        if self.game_initializer is not None:
+            self.endGame(None, None)
+
         song_title = request.songTitle
-        num_players = request.numOfPlayers
+        num_players = request.numberOfPlayers
         self.game_manager.num_players = num_players  # TODO: Handle players initialization.
         # game_speed = request.gameSpeed  # TODO: Training mode: set gameplay speed.
 
-        pose_sequence = load_from(f"./Songs/{song_title}.pkl")
-        target_sequence = PoseSequence(pose_sequence, fps=10)
-        weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}
+        if song_title not in self.song_list:
+            return service_pb2.GameStatus(numberOfPlayers=0, status="not found")
 
-        self.comparator = PoseSequenceScore(target_sequence, "angular", window_duration=3,
-                                            weights_config=weights_config)
-        self.score_controller = ScoreController()
+        # pose_sequence = load_from(f"./Songs/{song_title}.pkl")
+        #
+        # target_sequence = PoseSequence(pose_sequence, fps=10)
+        # weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}
+        #
+        # self.comparator = PoseSequenceScore(target_sequence, "angular", window_duration=3,
+        #                                     weights_config=weights_config)
+        # self.score_controller = ScoreController()
 
         self.game_manager.init_camera()
 
@@ -66,8 +85,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
                                                                                  self.score_controller,
                                                                                  self.game_manager))
 
-        self.tracking_thread.start()
-        self.pose_estimation_thread.start()
+        # self.tracking_thread.start()
+        # self.pose_estimation_thread.start()
 
         self.game_initializer = GameInitializer(self.game_manager, num_players)
         self.game_init_thread = threading.Thread(target=self.game_initializer.init_game,
@@ -75,20 +94,34 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
 
         self.game_init_thread.start()
 
+        print(f"[LOG] DONE with loadGame.")
+        print("-----------------------------------------")
+
         return service_pb2.GameStatus(numberOfPlayers=0, status="waiting")
 
     def startGame(self, request, context):
+        """
+        After game load, use this function to return information about the players (how many are raising their hands).
+        The game will start when enough players are raising their hands, meanwhile, this function is used to get
+        game status.
+        This function can also be used to ask for game cancellation.
+        """
 
         if request.status == 'cancel':
             self.game_initializer.cancel_game()
             self.endGame(None, None)
+            time.sleep(0.5)
             return service_pb2.GameStatus(status="canceled")
+
+        if self.game_initializer is None:
+            print("GAME IS NOT LOADED!")
+            return service_pb2.GameStatus(numberOfPlayers=0, status="game is not loaded")
 
         players, should_start = self.game_initializer.get_players_status()
 
         if should_start:
             self.game_init_thread.join()
-            self.game_manager.start_game(players)
+            # self.game_manager.start_game(players)
             return service_pb2.GameStatus(numberOfPlayers=len(players), status="ready")
         else:
             return service_pb2.GameStatus(numberOfPlayers=len(players), status="waiting")
@@ -97,6 +130,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         """
         Returns the scores for the players on the most recent frame (current score and total score for each player).
         """
+        print(f"[LOG] Received getScore. Request: []")
+
         score = self.game_manager.get_score()
         players = self.game_manager.get_players()
 
@@ -105,6 +140,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         score1 = score[p1] if score[p1] is not None else (0, 0)
         score2 = score[p2] if p2 is not None else (0, 0)
 
+        print(f"[LOG] DONE with getScore.")
+        print("-----------------------------------------")
         return service_pb2.ScoreResponse(score1=score1[0],
                                          totalScore1=score1[1],
                                          score2=score2[0],
@@ -116,17 +153,20 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         Returns:
             EndStatus: status of game termination ('success' if termination was successful).
         """
+        print(f"[LOG] Received endGame. Request: []")
         self.game_manager.end_game()
 
         self.game_initializer = None
 
-        self.pose_estimation_thread.join()
-        self.tracking_thread.join()
+        # self.pose_estimation_thread.join()
+        # self.tracking_thread.join()
         self.game_init_thread.join()
 
         self.game_manager.reset()
         self.model.reset()
 
+        print(f"[LOG] DONE with endGame.")
+        print("-----------------------------------------")
         return service_pb2.EndStatus(status="success",
                                      winner=1,
                                      totalScore1=0,

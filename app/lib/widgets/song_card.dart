@@ -18,7 +18,10 @@ class SongCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+        child:
+        GestureDetector(
       onTap: onTap,
       child: Container(
         height: MediaQuery.of(context).size.height - 100,
@@ -85,6 +88,6 @@ class SongCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
