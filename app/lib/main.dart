@@ -120,6 +120,14 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
               0.0, duration: const Duration(seconds: 1));
         }
       });
+      
+      _loadStatus.catchError((error) async {
+        setState(() {
+          _loadText = "An error occurred. Try re-opening the app.";
+        });
+        await _controller.animateTo(0.0, duration: const Duration(seconds: 1));
+        return LoadStatus(status: "failed");
+      });
 
     } catch (error) {
       await _controller.animateTo(0.0, duration: const Duration(seconds: 1));

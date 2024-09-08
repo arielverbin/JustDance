@@ -14,8 +14,10 @@ class Song {
   String artist;
   String bestScore;
   String imageUrl;
+  String name;
+  int difficulty;
 
-  Song(this.title, this.artist, this.bestScore, this.imageUrl);
+  Song(this.title, this.artist, this.bestScore, this.imageUrl, this.name, this.difficulty);
 }
 
 class HomePage extends StatefulWidget {
@@ -56,7 +58,7 @@ class HomePageState extends State<HomePage> {
       AlertWidget(
         icon: const Icon(Icons.warning_amber_rounded,
             color: Colors.white, size: 40.0),
-        color: Colors.redAccent,
+        color: Colors.grey.shade800,
         title: title,
         content: content,
         duration: 2,
@@ -69,7 +71,7 @@ class HomePageState extends State<HomePage> {
 
     setState(() { gameStarted = true; });
     final gameRequest = GameRequest(
-      songTitle: song.title,
+      songTitle: song.name,
       numberOfPlayers: numberOfPlayers,
       gameSpeed: 1,
     );
@@ -84,8 +86,8 @@ class HomePageState extends State<HomePage> {
           MaterialPageRoute(
             builder: (context) => GameStartPage(
               numberOfPlayers: numberOfPlayers,
-              playerNames: const ['susan', 'noah'],
-              songTitle: song.title,
+              playerNames: const ['susan'],
+              songName: song.name,
             ),
           ),
         ).then((res) {
@@ -97,8 +99,8 @@ class HomePageState extends State<HomePage> {
 
       } else {
         gameStarted = false;
-        _showError("Song Not Found",
-            "The chosen song could not be found, try selecting a different one.");
+        _showError("How about a different one?",
+            "The chosen song could not be found. But we promise, all songs are fun!");
       }
     });
   }
@@ -107,11 +109,10 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // The list of songs for the carousel
     final List<Song> songs = [
-      Song('Unicorn', 'Noa Kirel', '358936', 'assets/images/background.png'),
-      Song('Flowers', 'Miley Cirus', '495863', 'assets/images/background.png'),
-      Song('Starships', 'Nicky Minaj', '43609376', 'assets/images/background.png'),
-      Song('random', 'Artist 4', 'Best Score 4', 'assets/images/background.png'),
-      Song('random', 'Artist 5', 'Best Score 5', 'assets/images/background.png'),
+      Song('Unicorn', 'Noa Kirel', '358936', 'assets/images/background.png', "unicorn", 2),
+      Song('Flowers', 'Miley Cirus', '495863', 'assets/images/background.png', "flowers", 3),
+      Song('Starships', 'Nicky Minaj', '43609376', 'assets/images/background.png', "starships", 4),
+      Song('Test App', 'Just Dance Team', '----', 'assets/images/background.png', "test_app_dance", 1),
     ];
 
     return Scaffold(
@@ -149,6 +150,7 @@ class HomePageState extends State<HomePage> {
                       title: songs[itemIndex].title,
                       artist: songs[itemIndex].artist,
                       bestScore: songs[itemIndex].bestScore,
+                      difficulty: songs[itemIndex].difficulty,
                       imageUrl: songs[itemIndex].imageUrl,
                       onTap: () {
                         _loadGameAndStart(context, songs[itemIndex]);
@@ -171,7 +173,7 @@ class HomePageState extends State<HomePage> {
 
           // Just Dance logo on the top left corner
           Positioned(
-              left: (350 - 150 - 60) / 2,
+              left: (350 - 150 - 50) / 2,
               // SongCard's margin from left, logo's width.
               top: (350 - 150 - 60) / 2,
               child: Column(

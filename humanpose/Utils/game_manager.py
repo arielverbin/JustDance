@@ -12,10 +12,12 @@ class GameManager:
         self.game_state_lock = threading.Lock()
         self.game_condition = threading.Condition(self.game_state_lock)
         self.game_started = False
+        self.game_canceled = False
 
         self.score_lock = threading.Lock()
         self.score_condition = threading.Condition(self.score_lock)
-        self.last_score = None
+        self.last_score = None  # Resets to None whenever it is accessed (to prevent accessing the same score twice)
+        self.final_score = None  # Does not reset to None (fetch last score).
 
         self.capture = None
         self.model = inference_model
@@ -36,6 +38,7 @@ class GameManager:
 
         with self.game_condition:
             self.game_started = True
+            self.game_canceled = False
             self.game_condition.notify_all()
 
     def wait_for_game_start(self):
@@ -43,7 +46,7 @@ class GameManager:
         Waits until the game starts.
         """
         with self.game_condition:
-            while not self.game_started:
+            while (not self.game_started) and (not self.game_canceled):
                 self.game_condition.wait()
 
     def end_game(self):
@@ -51,15 +54,29 @@ class GameManager:
         End the game and notify the threads.
         """
         with self.game_condition:
-            self.game_started = False
+            print("closing game...")
+            self.game_started = True
+            self.game_canceled = True
             self.game_condition.notify_all()
+
+    def cancel_game(self):
+        print("cancel?")
+        with self.game_condition:
+            print("canceling game...")
+            self.game_started = False
+            self.game_canceled = True
+            self.game_condition.notify_all()
+
+    def did_game_end(self):
+        with self.game_condition:
+            return not self.game_started
 
     def should_terminate(self):
         """
         Check if the game has ended and the threads should terminate.
         """
-        with self.game_state_lock:
-            return not self.game_started
+        with self.game_condition:
+            return (not self.game_started) or self.game_canceled
 
     def get_score(self):
         """
@@ -73,6 +90,10 @@ class GameManager:
             score = self.last_score
             self.last_score = None
             return score
+
+    def get_final_score(self):
+        with self.score_condition:
+            return self.final_score
 
     def get_players(self):
         """
@@ -88,6 +109,7 @@ class GameManager:
         """
         with self.score_condition:
             self.last_score = score
+            self.final_score = score
             self.score_condition.notify_all()
 
     def get_inference_model(self):
@@ -115,6 +137,8 @@ class GameManager:
 
         with self.game_state_lock:
             self.game_started = False
+            self.game_canceled = False
 
         with self.score_lock:
             self.last_score = None
+            self.final_score = None

@@ -81,7 +81,7 @@ class AlertWidgetState extends State<AlertWidget> {
         child: Container(
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: widget.color.withOpacity(0.7),
+            color: widget.color.withOpacity(0.3),
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Wrap(
@@ -98,13 +98,16 @@ class AlertWidgetState extends State<AlertWidget> {
                         widget.title,
                         style: const TextStyle(
                           fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       ),
                       Text(
                         widget.content,
-                        style: const TextStyle(fontSize: 16.0, color: Colors.white),
+                        style: const TextStyle(fontSize: 16.0,
+                            fontFamily: 'Poppins',
+                            color: Colors.white),
                       ),
                     ],
                   ),

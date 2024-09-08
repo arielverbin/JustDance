@@ -25,7 +25,9 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.game_init_thread = None
         self.game_initializer = None
         self.loaded = False
-        self.song_list = ["random"]
+        self.song_list = ["test_app_dance"]
+
+        self.last_game_scores = None
 
     def loadService(self, request, context):
         """
@@ -59,9 +61,9 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
               f"Request: [numOfPlayers: {request.numberOfPlayers}, songTitle: {request.songTitle}]")
 
         if self.game_initializer is not None:
-            self.endGame(None, None)
+            self.end_game()
 
-        song_title = request.songTitle
+        song_title = request.songTitle  # request.songTitle
         num_players = request.numberOfPlayers
         self.game_manager.num_players = num_players  # TODO: Handle players initialization.
         # game_speed = request.gameSpeed  # TODO: Training mode: set gameplay speed.
@@ -69,14 +71,14 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         if song_title not in self.song_list:
             return service_pb2.GameStatus(numberOfPlayers=0, status="not found")
 
-        # pose_sequence = load_from(f"./Songs/{song_title}.pkl")
-        #
-        # target_sequence = PoseSequence(pose_sequence, fps=10)
-        # weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}
-        #
-        # self.comparator = PoseSequenceScore(target_sequence, "angular", window_duration=3,
-        #                                     weights_config=weights_config)
-        # self.score_controller = ScoreController()
+        pose_sequence = load_from(f"./Songs/{song_title}.pkl")
+
+        target_sequence = PoseSequence(pose_sequence, fps=10)
+        weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}
+
+        self.comparator = PoseSequenceScore(target_sequence, "angular", window_duration=3,
+                                            weights_config=weights_config)
+        self.score_controller = ScoreController()
 
         self.game_manager.init_camera()
 
@@ -85,14 +87,16 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
                                                                                  self.score_controller,
                                                                                  self.game_manager))
 
-        # self.tracking_thread.start()
-        # self.pose_estimation_thread.start()
+        self.tracking_thread.start()
+        self.pose_estimation_thread.start()
 
         self.game_initializer = GameInitializer(self.game_manager, num_players)
         self.game_init_thread = threading.Thread(target=self.game_initializer.init_game,
                                                  args=(GameInitializer.RAISING_HANDS_POSE,))
 
         self.game_init_thread.start()
+
+        self.last_game_scores = None
 
         print(f"[LOG] DONE with loadGame.")
         print("-----------------------------------------")
@@ -106,24 +110,33 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         game status.
         This function can also be used to ask for game cancellation.
         """
-
+        print(f"[LOG] Received startGame. Request: [{request.status}]")
         if request.status == 'cancel':
             self.game_initializer.cancel_game()
-            self.endGame(None, None)
-            time.sleep(0.5)
+
+            self.pose_estimation_thread.join()
+            self.tracking_thread.join()
+            self.game_init_thread.join()
+            self.end_game()
+
+            print("[LOG] Canceling...")
             return service_pb2.GameStatus(status="canceled")
 
         if self.game_initializer is None:
-            print("GAME IS NOT LOADED!")
+            print("[ERR] IN GAME-START: GAME IS NOT LOADED!")
+            print("-----------------------------------------")
             return service_pb2.GameStatus(numberOfPlayers=0, status="game is not loaded")
 
         players, should_start = self.game_initializer.get_players_status()
 
         if should_start:
             self.game_init_thread.join()
-            # self.game_manager.start_game(players)
+            self.game_manager.start_game(players)
+            print(f"\n\n\nGAME IS STARTING. PLAYERS: {self.game_manager.get_players()}")
+            print("-----------------------------------------")
             return service_pb2.GameStatus(numberOfPlayers=len(players), status="ready")
         else:
+            print("-----------------------------------------")
             return service_pb2.GameStatus(numberOfPlayers=len(players), status="waiting")
 
     def getScore(self, request, context):
@@ -132,20 +145,14 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         """
         print(f"[LOG] Received getScore. Request: []")
 
-        score = self.game_manager.get_score()
-        players = self.game_manager.get_players()
+        score1, score2 = self.fetch_scores(final=False)
 
-        p1 = players[0]
-        p2 = players[1] if players[1] is not None else None
-        score1 = score[p1] if score[p1] is not None else (0, 0)
-        score2 = score[p2] if p2 is not None else (0, 0)
-
-        print(f"[LOG] DONE with getScore.")
+        print(f"[LOG] DONE with getScore (score1={score1[0]}, totalScore1={score1[1]})")
         print("-----------------------------------------")
-        return service_pb2.ScoreResponse(score1=score1[0],
-                                         totalScore1=score1[1],
-                                         score2=score2[0],
-                                         totalScore2=score2[1])
+        return service_pb2.ScoreResponse(score1=int(score1[0]),
+                                         totalScore1=int(score1[1]),
+                                         score2=int(score2[0]),
+                                         totalScore2=int(score2[1]))
 
     def endGame(self, request, context):
         """
@@ -154,20 +161,60 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
             EndStatus: status of game termination ('success' if termination was successful).
         """
         print(f"[LOG] Received endGame. Request: []")
-        self.game_manager.end_game()
+        print("1")
 
-        self.game_initializer = None
+        score1, score2 = self.fetch_scores(final=True)
 
-        # self.pose_estimation_thread.join()
-        # self.tracking_thread.join()
-        self.game_init_thread.join()
+        self.end_game()
+        winner = 1 if score1[1] > score2[1] else 2
 
-        self.game_manager.reset()
-        self.model.reset()
-
-        print(f"[LOG] DONE with endGame.")
+        print(f"[LOG] DONE with endGame (winner: {winner}, totalScore1: {score1[1]})")
         print("-----------------------------------------")
         return service_pb2.EndStatus(status="success",
-                                     winner=1,
-                                     totalScore1=0,
-                                     totalScore2=0)
+                                     winner=winner,
+                                     totalScore1=score1[1],
+                                     totalScore2=score2[1])
+
+    def end_game(self):
+        print("2")
+        self.game_manager.end_game()
+
+        print("3")
+        self.game_initializer = None
+        self.pose_estimation_thread.join()
+        print("4")
+        self.tracking_thread.join()
+        print("5")
+        self.game_init_thread.join()
+
+        print("6")
+        self.game_manager.reset()
+        print("7")
+        self.model.reset()
+        print("8")
+
+    def fetch_scores(self, final=False):
+        """
+            Get the current player's scores.
+            Args:
+                final:  Whether the scores should be considered as final or not. If final is false, the method will wait until
+                        new score arrives since last call.
+            Returns:
+                two tuples, each tuple contains a player's last and total score.
+        """
+        players = self.game_manager.get_players()
+
+        if self.last_game_scores is not None:  # Game was already ended, game_manager might have been already reset.
+            score = self.last_game_scores
+        elif not final:
+            score = self.game_manager.get_score()  # Game is running, fetch last scores.
+        else:
+            score = self.game_manager.get_final_score()  # Game just ended. get final score and update last_game_scores.
+            self.last_game_scores = score
+
+        p1 = players[0]
+        p2 = players[1] if len(players) > 1 and players[1] is not None else None
+        score1 = score[p1] if score[p1] is not None else (0, 0)
+        score2 = score[p2] if p2 is not None else (0, 0)
+
+        return score1, score2
