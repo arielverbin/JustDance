@@ -54,20 +54,23 @@ class GameManager:
         End the game and notify the threads.
         """
         with self.game_condition:
-            print("closing game...")
             self.game_started = True
             self.game_canceled = True
             self.game_condition.notify_all()
 
     def cancel_game(self):
-        print("cancel?")
+        """
+        Checks whether the game was canceled or not.
+        """
         with self.game_condition:
-            print("canceling game...")
             self.game_started = False
             self.game_canceled = True
             self.game_condition.notify_all()
 
     def did_game_end(self):
+        """
+        Checks whether the game ended or not.
+        """
         with self.game_condition:
             return not self.game_started
 
@@ -92,6 +95,9 @@ class GameManager:
             return score
 
     def get_final_score(self):
+        """
+        Gets the final scores of each player at the end of the game.
+        """
         with self.score_condition:
             return self.final_score
 

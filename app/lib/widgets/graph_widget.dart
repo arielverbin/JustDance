@@ -30,7 +30,7 @@ class GraphWidgetState extends State<GraphWidget> {
 
   late Timer _timer;
   int currentIndex = 1;
-  int totalAnimationTime = 800;
+  int totalAnimationTime = 1100;
   double _opacity = 0.0;
   late bool singlePlayer;
 

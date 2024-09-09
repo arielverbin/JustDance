@@ -1,7 +1,6 @@
 import cv2
-from Comparasion.pose import Pose
-from Comparasion.utils import calc_angle
 import threading
+import time
 
 
 class GameInitializer:
@@ -19,9 +18,11 @@ class GameInitializer:
         self.should_start = False
         self.game_manager = game_manager
 
-        self.players = None
+        self.updated_since_last = True
 
-        self.players_status = None
+        self.timey = time.time()
+
+        self.players_status = []
 
     @staticmethod
     def _get_angle_checker(bigger_than, critical_angle):
@@ -50,9 +51,7 @@ class GameInitializer:
         while True:
 
             with self.lock:
-                print("init cancel??")
                 if self.should_cancel:
-                    print("init canceling!!1")
                     return
 
             ret, img = capture.read()
@@ -74,16 +73,28 @@ class GameInitializer:
                     if self._is_posing(starting_pose, current_pose):
                         players.append(player_id)
 
+            # Make sure the first player is the one on the right.
+            # Compares the X value of their noses.
+            if len(players) > 1:
+                if keypoints[players[0]][0][1] > keypoints[players[1]][0][1]:
+                    print(f"[LOG] SWITCHED PLACES: first one: {keypoints[players[0]][0][1]:.4f}"
+                          f" and second {keypoints[players[1]][0][1]:.4f}.")
+                    players.reverse()
+
             with self.lock:
-                self.players_status = players
-                self.condition.notify_all()
 
-                if players != self.players:
-                    self.players = players
+                # if the player status was changed, update the status and notify.
+                if players != self.players_status:
+                    self.players_status = players
+                    self.updated_since_last = True
+                    self.condition.notify_all()
 
+                # If enough players are raising their hands, start countdown to start.
+                # TODO: too much players are raising their hands!
                 if len(players) == self.number_players:
                     confidence_count += 1
                     if confidence_count == confidence_t:
+                        # Countdown was completed. start game.
                         self.should_start = True
                         self.condition.notify_all()
                         return
@@ -126,12 +137,14 @@ class GameInitializer:
         Blocks the thread until new update is available.
         If should_start is true, then all players were raising their hands and the game should start!
         """
+        print(f"[LOG] Fetching... [{time.time() - self.timey:.4f}s]")
         with self.condition:
-            while (not self.should_start) and self.players_status is None:
+            while (not self.should_start) and (not self.updated_since_last):
                 self.condition.wait()
 
-            status = self.players_status
-            self.players_status = None
+            print(f"[LOG] Fetched new status: {self.players_status}. [{time.time() - self.timey:.4f}s]")
+            self.updated_since_last = False
+            status = self.players_status if self.players_status is not None else []
             return status, self.should_start
 
 

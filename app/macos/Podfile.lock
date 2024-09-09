@@ -1,4 +1,9 @@
 PODS:
+  - audioplayers_darwin (0.0.1):
+    - FlutterMacOS
+  - flutter_webrtc (0.11.3):
+    - FlutterMacOS
+    - WebRTC-SDK (= 125.6422.04)
   - FlutterMacOS (1.0.0)
   - fvp (0.17.0):
     - Flutter
@@ -11,8 +16,11 @@ PODS:
   - video_player_avfoundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - WebRTC-SDK (125.6422.04)
 
 DEPENDENCIES:
+  - audioplayers_darwin (from `Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos`)
+  - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - fvp (from `Flutter/ephemeral/.symlinks/plugins/fvp/darwin`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
@@ -21,8 +29,13 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - mdk
+    - WebRTC-SDK
 
 EXTERNAL SOURCES:
+  audioplayers_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/macos
+  flutter_webrtc:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   fvp:
@@ -33,11 +46,14 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin
 
 SPEC CHECKSUMS:
+  audioplayers_darwin: dcad41de4fbd0099cb3749f7ab3b0cb8f70b810c
+  flutter_webrtc: 2b4e4a2de70a1485836e40fd71a7a94c77d49bd9
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   fvp: 6e4e1f45b22816d81da8f565799a13e05e9b3383
   mdk: 66f31cfd10f1339837797c95842cd6ce3466ff4e
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
+  WebRTC-SDK: c3d69a87e7185fad3568f6f3cff7c9ac5890acf3
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367
 

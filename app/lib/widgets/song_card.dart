@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SongCard extends StatelessWidget {
   final String title;
   final String artist;
-  final String bestScore;
+  final Map<String, int> bestScores;
   final String imageUrl;
   final int difficulty; // Add difficulty field
   final VoidCallback onTap;
@@ -11,7 +11,7 @@ class SongCard extends StatelessWidget {
   const SongCard({
     required this.title,
     required this.artist,
-    required this.bestScore,
+    required this.bestScores,
     required this.imageUrl,
     required this.difficulty, // Initialize difficulty field
     required this.onTap,
@@ -20,6 +20,9 @@ class SongCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<MapEntry<String, int>> sortedScores = bestScores.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -73,21 +76,22 @@ class SongCard extends StatelessWidget {
                             'BEST SCORE ', // "BEST SCORE" part
                             style: TextStyle(
                               fontSize: 16.0,
+                              fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                               color: Colors.white70, // Color for "BEST SCORE"
                             ),
                           ),
-                          const Spacer(), // Pushes best score to the right
-                          Text(
-                            bestScore, // The score part
-                            style: const TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w700, // Font weight for score
-                              color: Colors.white, // Color for score
-                            ),
-                          ),
+                          const Spacer(),
+
+                          ..._scoreLine(sortedScores[0].key, sortedScores[0].value, true)
                         ],
                       ),
+                      Column(children: sortedScores.skip(1).map((entry) {
+                        return Row(
+                            children: [
+                            const Spacer(), ..._scoreLine(entry.key, entry.value, false)]
+                        );
+                      }).toList(),)
                     ],
                   ),
                 ),
@@ -115,6 +119,29 @@ class SongCard extends StatelessWidget {
       ),
     );
   }
+
+  List<Widget> _scoreLine(String name, int score, bool lead) {
+    return [
+        Text(
+          '${name.toUpperCase()}  ', // Display player name
+          style: TextStyle(
+            fontSize: 16.0,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500,
+            color: lead ? Colors.white70 : const Color.fromRGBO(255, 255, 255, 0.3),
+          ),
+        ),
+        Text(
+          score.toString(), // Display score
+          style: TextStyle(
+            fontSize: 16.0,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            color: lead ? Colors.white : const Color.fromRGBO(255, 255, 255, 0.4),
+          ),
+        ),
+      ];
+  }
 }
 
 class DifficultyIndicator extends StatelessWidget {
@@ -131,20 +158,22 @@ class DifficultyIndicator extends StatelessWidget {
           style: TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w500,
-            color: Colors.white70, // Color for "DIFFICULTY"
+            color: Colors.white70,
+            fontFamily: 'Poppins'
           ),
         ),
         const Spacer(), // Pushes the difficulty squares to the right
         Row(
           children: [
-            _buildSquare(Colors.green, difficulty >= 1, 0),
-            _buildSquare(Colors.yellow, difficulty >= 2, 4),
-            _buildSquare(Colors.orange, difficulty >= 3, 4),
-            _buildSquare(Colors.red, difficulty >= 4, 4),
+            _buildSquare(Colors.deepOrange, difficulty >= 4, 0),
+            _buildSquare(Colors.orangeAccent, difficulty >= 3, 4),
+            _buildSquare(Colors.yellowAccent, difficulty >= 2, 4),
+            _buildSquare(Colors.greenAccent, difficulty >= 1, 4),
           ],
         ),
       ],
     );
+
   }
 
   Widget _buildSquare(Color color, bool isVisible, double margin) {

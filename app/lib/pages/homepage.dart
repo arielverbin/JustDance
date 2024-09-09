@@ -8,17 +8,21 @@ import 'package:app/widgets/settings_widget.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
 import 'package:app/utils/service/client.dart';
 import 'package:app/widgets/alert_widget.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class Song {
   String title;
   String artist;
-  String bestScore;
+  Map<String, int> bestScores;
   String imageUrl;
   String name;
   int difficulty;
 
-  Song(this.title, this.artist, this.bestScore, this.imageUrl, this.name, this.difficulty);
+  Song(this.title, this.artist, this.bestScores, this.imageUrl, this.name,
+      this.difficulty);
 }
+
+// TODO: add delay to start game right after camera preview was used (to let camera turn off).
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,9 +34,10 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageState> _homepageKey = GlobalKey();
   late CarouselController _carouselController;
-  late int numberOfPlayers;
   late bool gameStarted = false;
 
+  late int numberOfPlayers;
+  List<String> playerNames = ['ava'];
 
   @override
   void initState() {
@@ -41,15 +46,16 @@ class HomePageState extends State<HomePage> {
     _carouselController = CarouselController();
   }
 
+  void updatePlayerSelections(List<String> selectedPlayers) {
+    setState(() {
+      playerNames = selectedPlayers;
+      numberOfPlayers = selectedPlayers.length;
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
-  }
-
-  void _onNumberOfPlayersChanged(int newNumberOfPlayers) {
-    setState(() {
-      numberOfPlayers = newNumberOfPlayers;
-    });
   }
 
   void _showError(String title, String content) {
@@ -67,18 +73,25 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadGameAndStart(BuildContext context, Song song) async {
-    if(gameStarted) return;
+    if (gameStarted) return;
 
-    setState(() { gameStarted = true; });
+    AudioPlayer audioPlayer = AudioPlayer();
+    await audioPlayer.setVolume(0.5);
+    await audioPlayer.play(
+        AssetSource('sound-effects/game-start.mp3'));
+
+    setState(() {
+      gameStarted = true;
+    });
     final gameRequest = GameRequest(
       songTitle: song.name,
       numberOfPlayers: numberOfPlayers,
       gameSpeed: 1,
     );
 
-    ScoringPoseServiceClient(getClientChannel()).loadGame(gameRequest)
+    ScoringPoseServiceClient(getClientChannel())
+        .loadGame(gameRequest)
         .then((response) {
-
       if (response.status == "waiting") {
         // loading succeeded, game is waiting for players.
         Navigator.push(
@@ -86,7 +99,7 @@ class HomePageState extends State<HomePage> {
           MaterialPageRoute(
             builder: (context) => GameStartPage(
               numberOfPlayers: numberOfPlayers,
-              playerNames: const ['susan'],
+              playerNames: playerNames,
               songName: song.name,
             ),
           ),
@@ -94,9 +107,7 @@ class HomePageState extends State<HomePage> {
           setState(() {
             gameStarted = false;
           });
-
         });
-
       } else {
         gameStarted = false;
         _showError("How about a different one?",
@@ -109,10 +120,40 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // The list of songs for the carousel
     final List<Song> songs = [
-      Song('Unicorn', 'Noa Kirel', '358936', 'assets/images/background.png', "unicorn", 2),
-      Song('Flowers', 'Miley Cirus', '495863', 'assets/images/background.png', "flowers", 3),
-      Song('Starships', 'Nicky Minaj', '43609376', 'assets/images/background.png', "starships", 4),
-      Song('Test App', 'Just Dance Team', '----', 'assets/images/background.png', "test_app_dance", 1),
+      Song(
+          'Unicorn',
+          'Noa Kirel',
+          {'susan': 342, 'noah': 3491, 'emily': 1904, 'ava': 301},
+          'assets/images/background.png',
+          "unicorn",
+          2),
+      Song(
+          'Flowers',
+          'Miley Cirus',
+          {'caleb': 3412, 'noah': 529, 'susan': 2312},
+          'assets/images/background.png',
+          "flowers",
+          3),
+      Song(
+          'Starships',
+          'Nicky Minaj',
+          {'susan': 4023, 'noah': 3491, 'emily': 523, 'liam': 420, 'ava': 3021},
+          'assets/images/background.png',
+          "starships",
+          4),
+      Song(
+          'Test App',
+          'Just Dance Team',
+          {
+            'susan': 1702,
+            'noah': 2034,
+            'emily': 1573,
+            'liam': 1813,
+            'ava': 3913
+          },
+          'assets/images/background.png',
+          "test_app_dance",
+          1),
     ];
 
     return Scaffold(
@@ -130,65 +171,87 @@ class HomePageState extends State<HomePage> {
             ),
           ),
 
-          Padding(
-            padding: const EdgeInsets.only(left: 350.0, right: 20.0),
-            // Adjusted padding
-            child: GestureDetector(
-                onVerticalDragUpdate: (details) {
-                  if (details.primaryDelta! > 0) {
-                    _carouselController.previousPage();
-                  } else if (details.primaryDelta! < 0) {
-                    _carouselController.nextPage();
-                  }
-                },
-                child: CarouselSlider.builder(
-                  carouselController: _carouselController,
-                  itemCount: songs.length,
-                  itemBuilder:
-                      (BuildContext context, int itemIndex, int pageViewIndex) {
-                    return SongCard(
-                      title: songs[itemIndex].title,
-                      artist: songs[itemIndex].artist,
-                      bestScore: songs[itemIndex].bestScore,
-                      difficulty: songs[itemIndex].difficulty,
-                      imageUrl: songs[itemIndex].imageUrl,
-                      onTap: () {
-                        _loadGameAndStart(context, songs[itemIndex]);
-                      },
-                    );
-                  },
-                  options: CarouselOptions(
-                    height: MediaQuery.of(context).size.height,
-                    viewportFraction: 0.8,
-                    enlargeCenterPage: true,
-                    aspectRatio: 1 / 1,
-                    onPageChanged: (index, reason) {
-                      // TODO: add sound effect :)
-                    },
-                    scrollDirection:
-                        Axis.vertical,
-                  ),
-                )),
-          ),
+          // LayoutBuilder to adjust the space for the song list and the menu
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final double screenWidth = constraints.maxWidth;
+              const double leftSectionWidth = 350.0;
+              final double songListWidth = screenWidth - leftSectionWidth;
 
-          // Just Dance logo on the top left corner
-          Positioned(
-              left: (350 - 150 - 50) / 2,
-              // SongCard's margin from left, logo's width.
-              top: (350 - 150 - 60) / 2,
-              child: Column(
+              return Row(
                 children: [
-                  Image.asset(
-                    'assets/images/jd-logo.png',
-                    width: 150,
+                  // Left menu (350 pixels wide)
+                  SizedBox(
+                    width: leftSectionWidth,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 50,
+                        ),
+                        Image.asset(
+                          'assets/images/jd-logo.png',
+                          width: 150, // Adjust logo size
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        SettingWidget(
+                            updatePlayerSelections: updatePlayerSelections),
+                      ],
+                    ),
                   ),
-                  const SizedBox( height: 30,),
-                  SettingWidget(
-                    numberOfPlayers: numberOfPlayers,
-                    onNumberOfPlayersChanged: _onNumberOfPlayersChanged,
+
+                  // Scrollable song list takes up the remaining width
+                  SizedBox(
+                    width: songListWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 50.0),
+                      child: GestureDetector(
+                        onVerticalDragUpdate: (details) {
+                          if (details.primaryDelta! > 0) {
+                            _carouselController.previousPage();
+                          } else if (details.primaryDelta! < 0) {
+                            _carouselController.nextPage();
+                          }
+                        },
+                        child: CarouselSlider.builder(
+                          carouselController: _carouselController,
+                          itemCount: songs.length,
+                          itemBuilder: (BuildContext context, int itemIndex,
+                              int pageViewIndex) {
+                            return SongCard(
+                              title: songs[itemIndex].title,
+                              artist: songs[itemIndex].artist,
+                              bestScores: songs[itemIndex].bestScores,
+                              difficulty: songs[itemIndex].difficulty,
+                              imageUrl: songs[itemIndex].imageUrl,
+                              onTap: () {
+                                _loadGameAndStart(context, songs[itemIndex]);
+                              },
+                            );
+                          },
+                          options: CarouselOptions(
+                            height: MediaQuery.of(context).size.height,
+                            viewportFraction: 0.8,
+                            enlargeCenterPage: true,
+                            aspectRatio: 1 / 1,
+                            onPageChanged: (index, reason) async {
+                              AudioPlayer audioPlayer = AudioPlayer();
+                              await audioPlayer.setVolume(0.3);
+                              await audioPlayer.play(
+                                  AssetSource('sound-effects/whoosh.mp3'));
+                            },
+                            scrollDirection: Axis.vertical,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
-              )),
+              );
+            },
+          ),
         ],
       ),
     );

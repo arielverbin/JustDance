@@ -72,7 +72,7 @@ class PoseSequenceScore:
                 weights[i] = (start_index - i) * punish_factor
             elif i >= end_index:
                 weights[i] = (i - end_index + 1) * punish_factor
-        print(weights)
+
         return weights
 
     def convert_to_score(self, value):

@@ -16,13 +16,10 @@ def track_players(game_manager):
     while True:
         ret, img = capture.read()
 
-        print("wait?")
         game_manager.wait_for_game_start()
-        print("no! should?")
         if game_manager.should_terminate():
-            print("should!")
             break
-        print("should not!")
+
         if players is None:
             players = game_manager.get_players()
 

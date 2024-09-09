@@ -3,9 +3,7 @@ import 'package:app/pages/in_game_page.dart';
 import 'package:app/utils/service/client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
-import 'package:grpc/grpc.dart';
 import 'dart:math';
-
 
 import '../widgets/gradient_text.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
@@ -33,7 +31,7 @@ class GameStartState extends State<GameStartPage> {
   late List<String> tips = [
     "Make sure that throughout the game all players are fully visible for the camera.",
     "Optimize your camera setup with good lighting and a clear background.",
-    "Stand in front of the camera and face it directly.",
+    "Throughout the game, stand in front of the camera and face it directly.",
     "Switching places with other players might confuse the scoring mechanism."
   ];
 
@@ -205,8 +203,7 @@ class GameStartState extends State<GameStartPage> {
             child: SizedBox(
               height: 50,
               child: Center(
-                child:
-                  AnimatedOpacity(
+                child: AnimatedOpacity(
                   opacity: _opacity,
                   duration: const Duration(milliseconds: 500),
                   child: Text(

@@ -119,7 +119,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
             self.game_init_thread.join()
             self.end_game()
 
-            print("[LOG] Canceling...")
+            print("[LOG] Canceling game...")
             return service_pb2.GameStatus(status="canceled")
 
         if self.game_initializer is None:
@@ -161,12 +161,11 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
             EndStatus: status of game termination ('success' if termination was successful).
         """
         print(f"[LOG] Received endGame. Request: []")
-        print("1")
 
         score1, score2 = self.fetch_scores(final=True)
 
         self.end_game()
-        winner = 1 if score1[1] > score2[1] else 2
+        winner = 0 if score1[1] > score2[1] else 1
 
         print(f"[LOG] DONE with endGame (winner: {winner}, totalScore1: {score1[1]})")
         print("-----------------------------------------")
@@ -176,22 +175,19 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
                                      totalScore2=score2[1])
 
     def end_game(self):
-        print("2")
+        """
+            Ends game and joins all open threads.
+        """
         self.game_manager.end_game()
 
-        print("3")
         self.game_initializer = None
         self.pose_estimation_thread.join()
-        print("4")
         self.tracking_thread.join()
-        print("5")
         self.game_init_thread.join()
+        print("[LOG] Joined all threads.")
 
-        print("6")
         self.game_manager.reset()
-        print("7")
         self.model.reset()
-        print("8")
 
     def fetch_scores(self, final=False):
         """

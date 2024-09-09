@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app/widgets/graph_widget.dart';
+import 'package:confetti/confetti.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,37 +29,48 @@ class WinnerPageState extends State<WinnerPage> {
   bool _showWinnerRow = false;
   bool _showSecondRow = false;
   bool _showGraph = false;
-  String? winner;
+  String? winnerName;
+  int? winner;
   int? winnerScore;
   String? secondPlace;
   int? secondScore;
   late Future<void> _winnerFuture;
   final ValueNotifier<int> _scoreNotifier = ValueNotifier<int>(0);
 
+  late ConfettiController _confettiController; // Woo ho!
+
   @override
   void initState() {
     super.initState();
     _winnerFuture = _initializeWinnerAndScores();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeWinnerAndScores() async {
     final client = ScoringPoseServiceClient(getClientChannel());
     EndStatus status = await client.endGame(EndRequest());
     try {
+      winner = status.winner;
       if (widget.players.length > 1) {
-        if (status.winner == 1) {
-          winner = widget.players[0];
+        if (winner == 0) {
+          winnerName = widget.players[0];
           winnerScore = status.totalScore1;
           secondPlace = widget.players[1];
           secondScore = status.totalScore2;
         } else {
-          winner = widget.players[1];
+          winnerName = widget.players[1];
           winnerScore = status.totalScore2;
           secondPlace = widget.players[0];
           secondScore = status.totalScore1;
         }
       } else {
-        winner = widget.players[0];
+        winnerName = widget.players[0];
         winnerScore = status.totalScore1;
         secondPlace = "";
         secondScore = 0;
@@ -98,6 +110,11 @@ class WinnerPageState extends State<WinnerPage> {
       setState(() {
         _showWinnerRow = true;
         _showGraph = true;
+
+        if(widget.players.length > 1) {
+          _confettiController.play();
+        }
+
       });
 
       // Animate the score
@@ -241,7 +258,7 @@ class WinnerPageState extends State<WinnerPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SvgPicture.asset(
-                    'assets/characters/$winner.svg',
+                    'assets/characters/$winnerName.svg',
                     height: 80,
                   ),
                   const SizedBox(width: 20),
@@ -249,7 +266,7 @@ class WinnerPageState extends State<WinnerPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        winner!.toUpperCase(),
+                        winnerName!.toUpperCase(),
                         style: const TextStyle(
                           fontSize: 40,
                           color: Colors.white,
@@ -306,6 +323,23 @@ class WinnerPageState extends State<WinnerPage> {
                   ]),
                 ],
               ),
+            ),
+
+            ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Color(0xff6793e1),
+                Color(0xff7564e1),
+                Colors.white,
+                Color(0xffF27BBD),
+              ],
+              emissionFrequency: 0.01,
+              minBlastForce: 50,
+              maxBlastForce: 150,
+              numberOfParticles: 50,
+              gravity: 0.2,
             ),
             // Second place row
             secondPlace!.isNotEmpty
@@ -374,10 +408,10 @@ class WinnerPageState extends State<WinnerPage> {
                   height: MediaQuery.of(context).size.height / 2,
                   child: GraphWidget(
                     player1Scores: widget.plotScoresPlayer1,
-                    player1Name: winner ?? "",
+                    player1Name: widget.players[0],
                     player2Scores: widget.plotScoresPlayer2,
-                    player2Name: widget.players.length > 1 ? (secondPlace ?? "") : "none",
-                    isPlayer1Winner: true,
+                    player2Name: widget.players.length > 1 ? (widget.players[1]) : "none",
+                    isPlayer1Winner: winner == 0,
                     chorusTimes: const [],
                   ),
                 )

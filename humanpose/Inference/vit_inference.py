@@ -106,8 +106,11 @@ class VitInference:
         Resets the model and prepare it for the next game.
         """
         self.tracker.reset()
+        self.frame_counter = 0
         self._img = None
+        self.last_bboxes = None
         self._tracker_res = None
+        self.last_img = None
         self._keypoints = None
 
     def initialize_tracker(self):
