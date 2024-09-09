@@ -72,7 +72,7 @@ class PoseSequenceScore:
                 weights[i] = (start_index - i) * punish_factor
             elif i >= end_index:
                 weights[i] = (i - end_index + 1) * punish_factor
-        print(weights)
+
         return weights
 
     def convert_to_score(self, value):
@@ -94,6 +94,7 @@ class PoseSequenceScore:
 
         The compare result will be the minimum between sum of the scores with their corresponding weights.
 
+        If the time is exceeding the pose sequence, the default comparing result is 100 (~infinity).
         Args:
             pose: Pose
                 The pose that will be scored.

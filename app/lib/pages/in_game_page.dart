@@ -1,18 +1,21 @@
 import 'dart:async';
-import 'dart:math';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:app/widgets/score_widget.dart';
 import 'package:app/pages/winner_page.dart';
 
+import '../utils/service/client.dart';
+import '../utils/service/service.pbgrpc.dart';
+
 class InGamePage extends StatefulWidget {
-  final String songTitle;
+  final String songName;
   final int numberOfPlayers;
   final List<String> playerNames;
 
   const InGamePage({
     super.key,
-    required this.songTitle,
+    required this.songName,
     required this.numberOfPlayers,
     required this.playerNames,
   });
@@ -25,8 +28,12 @@ class InGamePageState extends State<InGamePage> {
   late VideoPlayerController _controller;
   late List<int> scores;
   late List<int> totalScores;
+  List<FlSpot> plotScoresPlayer1 = [];
+  List<FlSpot> plotScoresPlayer2 = [];
   late List<GlobalKey<ScoreWidgetState>> scoreWidgetKeys;
+  final client = ScoringPoseServiceClient(getClientChannel());
   late bool _inGame = true;
+  late DateTime startTime;
 
   @override
   void initState() {
@@ -38,7 +45,7 @@ class InGamePageState extends State<InGamePage> {
 
     // Initialize the controller with a local asset video file
     _controller =
-        VideoPlayerController.asset('assets/songs/${widget.songTitle}.mov')
+        VideoPlayerController.asset('assets/songs/${widget.songName}.mov')
           ..addListener(() {
             setState(() {});
             _checkVideoEnd();
@@ -46,6 +53,7 @@ class InGamePageState extends State<InGamePage> {
           ..setLooping(false)
           ..initialize().then((_) => setState(() {}));
     _controller.play();
+    startTime = DateTime.now();
 
     // Start the timer to update scores
     _maintainScore();
@@ -53,23 +61,25 @@ class InGamePageState extends State<InGamePage> {
 
   // Asynchronous function to simulate getting scores for the players
   Future<(List<int>, List<int>)> _getScore() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate a delay
-    Random random = Random();
-    var score1 = random.nextInt(100);
-    var score2 = random.nextInt(100);
-    var totalScore1 = random.nextInt(100);
-    var totalScore2 = random.nextInt(100);
+    ScoreResponse scores = await client.getScore(TimeRequest(time: 0));
     return (
-      [score1, score2],
-      [totalScore1, totalScore2]
-    ); // Return random scores between 0 and 100
+      [scores.score1, scores.score2],
+      [scores.totalScore1, scores.totalScore2]
+    );
   }
 
   // Function to maintain the scores, updating them in a loop
   void _maintainScore() async {
+    double timePassed;
+
     while (_inGame) {
       // Check if the widget is mounted before running the loop
       var (newScores, newTotalScores) = await _getScore(); // Get new scores
+
+      timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
+      plotScoresPlayer1.add(FlSpot(timePassed, newScores[0].toDouble()));
+      plotScoresPlayer2.add(FlSpot(timePassed, newScores[1].toDouble()));
+
       if (_inGame) {
         // Check if the widget is mounted before calling setState
         setState(() {
@@ -85,7 +95,7 @@ class InGamePageState extends State<InGamePage> {
     }
   }
 
-  void _checkVideoEnd() {
+  void _checkVideoEnd() async {
     if (!_controller.value.isPlaying &&
         _controller.value.position == _controller.value.duration) {
       _inGame = false;
@@ -97,7 +107,8 @@ class InGamePageState extends State<InGamePage> {
     Navigator.of(context).pushReplacement(PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => WinnerPage(
         players: widget.playerNames,
-        scores: totalScores,
+        plotScoresPlayer1: plotScoresPlayer1,
+        plotScoresPlayer2: plotScoresPlayer2,
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);

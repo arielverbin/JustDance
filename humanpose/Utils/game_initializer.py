@@ -1,7 +1,6 @@
 import cv2
-from Comparasion.pose import Pose
-from Comparasion.utils import calc_angle
 import threading
+import time
 
 
 class GameInitializer:
@@ -13,26 +12,17 @@ class GameInitializer:
 
     def __init__(self, game_manager, numer_players):
         self.lock = threading.Lock()
+        self.condition = threading.Condition(self.lock)
         self.number_players = numer_players
         self.should_cancel = False
         self.should_start = False
         self.game_manager = game_manager
 
-        # For raising hands, we need to check if the following angles, are bigger/smaller than their critical angle.
-        joints = [[8, 6, 12], [7, 5, 11],  # Lower Shoulder-Arms (left and right)
-                  [8, 6, 0], [7, 5, 0],  # Outer-Shoulder (left and right)
-                  [10, 8, 6], [9, 7, 5]]  # Arms (left and right)
+        self.updated_since_last = True
 
-        checkers = [GameInitializer._get_angle_checker(bigger_than=True, critical_angle=120),
-                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=120),
-                    GameInitializer._get_angle_checker(bigger_than=False, critical_angle=100),
-                    GameInitializer._get_angle_checker(bigger_than=False, critical_angle=100),
-                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=90),
-                    GameInitializer._get_angle_checker(bigger_than=True, critical_angle=90)]
+        self.timey = time.time()
 
-        self.angles = list(zip(joints, checkers))
-
-        self.players = []
+        self.players_status = []
 
     @staticmethod
     def _get_angle_checker(bigger_than, critical_angle):
@@ -80,28 +70,36 @@ class GameInitializer:
             if keypoints:
                 for player_id, current_pose in keypoints.items():
                     # Check if player is raising their hands.
-                    if self._is_posing(starting_pose, Pose(current_pose)):
+                    if self._is_posing(starting_pose, current_pose):
                         players.append(player_id)
 
+            # Make sure the first player is the one on the right.
+            # Compares the X value of their noses.
+            if len(players) > 1:
+                if keypoints[players[0]][0][1] > keypoints[players[1]][0][1]:
+                    print(f"[LOG] SWITCHED PLACES: first one: {keypoints[players[0]][0][1]:.4f}"
+                          f" and second {keypoints[players[1]][0][1]:.4f}.")
+                    players.reverse()
+
             with self.lock:
-                self.players = players
+
+                # if the player status was changed, update the status and notify.
+                if players != self.players_status:
+                    self.players_status = players
+                    self.updated_since_last = True
+                    self.condition.notify_all()
+
+                # If enough players are raising their hands, start countdown to start.
+                # TODO: too much players are raising their hands!
                 if len(players) == self.number_players:
                     confidence_count += 1
                     if confidence_count == confidence_t:
+                        # Countdown was completed. start game.
                         self.should_start = True
+                        self.condition.notify_all()
                         return
                 else:
                     confidence_count = 0
-
-            # if len(players) == 0:
-            #     print("#")
-            #     print("#")
-            # elif len(players) == 1:
-            #     print("#########################")
-            #     print("#########################")
-            # else:
-            #     print("##################################################")
-            #     print("##################################################")
 
     def cancel_game(self):
         """
@@ -109,6 +107,8 @@ class GameInitializer:
         """
         with self.lock:
             self.should_cancel = True
+
+        self.game_manager.cancel_game()
 
     def _is_posing(self, target, pose):
         """
@@ -120,16 +120,13 @@ class GameInitializer:
         Returns: bool, whether the player's pose is doing the target pose or not.
         """
         if target == self.RAISING_HANDS_POSE:
-            pose = pose.get_coordinates()
 
-            for joint, checker in self.angles:
-                angle = calc_angle((pose[joint[0]], pose[joint[1]]),
-                                   (pose[joint[1]], pose[joint[2]]))
+            left_shoulder, right_shoulder = 5, 6
+            left_elbow, right_elbow = 7, 8
+            left_wrist, right_wrist = 9, 10
 
-                if not checker(angle):
-                    return False
-
-            return True
+            return ((pose[left_shoulder][0] > pose[left_elbow][0] > pose[left_wrist][0])
+                    and (pose[right_shoulder][0] > pose[right_elbow][0] > pose[right_wrist][0]))
 
         else:
             raise NotImplementedError
@@ -137,10 +134,19 @@ class GameInitializer:
     def get_players_status(self):
         """
         Get the current player status of the game initialization.
+        Blocks the thread until new update is available.
         If should_start is true, then all players were raising their hands and the game should start!
         """
-        with self.lock:
-            return self.players, self.should_start
+        print(f"[LOG] Fetching... [{time.time() - self.timey:.4f}s]")
+        with self.condition:
+            while (not self.should_start) and (not self.updated_since_last):
+                self.condition.wait()
+
+            print(f"[LOG] Fetched new status: {self.players_status}. [{time.time() - self.timey:.4f}s]")
+            self.updated_since_last = False
+            status = self.players_status if self.players_status is not None else []
+            return status, self.should_start
+
 
 # TEST:
 # from Inference.vit_inference import VitInference

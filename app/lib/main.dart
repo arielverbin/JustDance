@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -14,7 +15,8 @@ Future<void> initService = Future(() => null);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  initService = initPy();
+  // initService = initPy(); // Uncomment this line when not debugging
+  initService = Future.delayed(const Duration(seconds: 2), () => null);
 
   runApp(const MainApp());  // Change back to MainApp!
 }
@@ -48,7 +50,7 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
   /// starts the animation and loads the services. *
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 20));
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 13));
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller)
       ..addListener(() {
         setState(() {});
@@ -86,32 +88,56 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
 
   /// Animates the loading bar and displays informative load status. *
   Future<void> startAnimation() async {
-    try {
-      setState(() {_loadText = "Loading...";});
 
+    try {
+      setState(() { _loadText = "Loading..."; });
+
+      // Start the initial animation and initService concurrently
       await Future.any([
         _controller.animateTo(0.5, duration: const Duration(seconds: 10)),
         initService,
       ]);
 
+      // If the initial animation finishes before initService, continue animating to 0.5
       if (_controller.value < 0.5) {
         await _controller.animateTo(0.5, duration: const Duration(seconds: 1));
       }
-      await initService; // In-case initService took more than 10 seconds.
-      setState(() {_loadText = "Initializing model...";});
 
-      await _controller.animateTo(1.0, duration: const Duration(seconds: 10));
-      if ((await _loadStatus).status != 'success') {
-        _controller.animateTo(0.0, duration: const Duration(seconds: 1));
+      // Ensure initService is complete
+      await initService;
+      setState(() { _loadText = "Initializing model..."; });
+
+      // Start the final loading animation and _loadStatus check concurrently
+      _controller.animateTo(1.0, duration: const Duration(seconds: 3));
+
+      _loadStatus.then((loadStatus) async {
+        if (loadStatus.status != 'success') {
+          setState(() {
+            _loadText =
+            "An error occurred while initializing model. Try re-opening the app.";
+          });
+          await _controller.animateTo(
+              0.0, duration: const Duration(seconds: 1));
+        }
+      });
+      
+      _loadStatus.catchError((error) async {
         setState(() {
-          _loadText = "An error occurred while initializing model. Try re-opening the app.";
+          _loadText = "An error occurred. Try re-opening the app.";
         });
-      }
-    } catch(error) {
-      _controller.animateTo(0.0, duration: const Duration(seconds: 1));
-      setState(() {_loadText = "An error occurred. Try re-opening the app.";});
+        await _controller.animateTo(0.0, duration: const Duration(seconds: 1));
+        return LoadStatus(status: "failed");
+      });
+
+    } catch (error) {
+      await _controller.animateTo(0.0, duration: const Duration(seconds: 1));
+      setState(() {
+        _loadText = "An error occurred. Try re-opening the app.";
+      });
     }
   }
+
+
 
   @override
   void dispose() {

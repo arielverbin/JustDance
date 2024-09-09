@@ -1,72 +1,52 @@
+import 'package:app/pages/winner_page.dart';
+import 'package:app/widgets/character_pick_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'camera_widget.dart';
 
 class SettingWidget extends StatefulWidget {
-  final int numberOfPlayers;
-  final ValueChanged<int> onNumberOfPlayersChanged;
+  final Function(List<String>) updatePlayerSelections; // Add the callback
 
   const SettingWidget({
-    Key? key,
-    required this.numberOfPlayers,
-    required this.onNumberOfPlayersChanged,
-  }) : super(key: key);
+    super.key,
+    required this.updatePlayerSelections,  // Initialize in constructor
+  });
 
   @override
-  _SettingWidgetState createState() => _SettingWidgetState();
+  SettingWidgetState createState() => SettingWidgetState();
 }
 
-class _SettingWidgetState extends State<SettingWidget> {
-  late int _selectedNumberOfPlayers;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedNumberOfPlayers = widget.numberOfPlayers;
-  }
-
+class SettingWidgetState extends State<SettingWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          'NUMBER OF PLAYERS',
-          style: TextStyle(color: Colors.white,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w700,
-              fontSize: 18),
+        const Text(
+          'CHARACTERS',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Radio<int>(
-              value: 1,
-              groupValue: _selectedNumberOfPlayers,
-              onChanged: (value) {
-                setState(() {
-                  _selectedNumberOfPlayers = value!;
-                  widget.onNumberOfPlayersChanged(_selectedNumberOfPlayers);
-                });
-              },
-            ),
-            Text(
-              '1',
-              style: TextStyle(color: Colors.white),
-            ),
-            Radio<int>(
-              value: 2,
-              groupValue: _selectedNumberOfPlayers,
-              onChanged: (value) {
-                setState(() {
-                  _selectedNumberOfPlayers = value!;
-                  widget.onNumberOfPlayersChanged(_selectedNumberOfPlayers);
-                });
-              },
-            ),
-            Text(
-              '2',
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
+        const SizedBox(height: 10),
+        CharacterPickWidget(
+          updatePlayerSelections: widget.updatePlayerSelections,  // Forward the callback
         ),
+        const SizedBox(height: 16),
+        const CameraWidget(),
+        // FloatingActionButton(onPressed: () {Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => const WinnerPage(
+        //       players: ['caleb', 'liam'],
+        //       plotScoresPlayer1: [FlSpot(0, 100), FlSpot(20, 30), FlSpot(40, 70), FlSpot(60, 0), FlSpot(80, 10), FlSpot(100, 80)],
+        //       plotScoresPlayer2: [FlSpot(0, 50), FlSpot(20, 70), FlSpot(40, 20), FlSpot(60, 70), FlSpot(80, 100), FlSpot(100, 20)],
+        //     )
+        //   ),
+        // );
+        // })
       ],
     );
   }
