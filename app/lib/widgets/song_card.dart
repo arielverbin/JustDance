@@ -173,7 +173,6 @@ class DifficultyIndicator extends StatelessWidget {
         ),
       ],
     );
-
   }
 
   Widget _buildSquare(Color color, bool isVisible, double margin) {

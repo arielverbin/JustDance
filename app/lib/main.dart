@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'package:app/pages/homepage.dart';
@@ -105,6 +106,12 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
 
       // Ensure initService is complete
       await initService;
+
+      AudioPlayer audioPlayer = AudioPlayer();
+      audioPlayer.setVolume(0.6);
+      audioPlayer.play(
+          AssetSource('sound-effects/dance-intro.mp3'));
+
       setState(() { _loadText = "Initializing model..."; });
 
       // Start the final loading animation and _loadStatus check concurrently

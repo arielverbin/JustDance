@@ -1,4 +1,6 @@
 import threading
+import time
+
 import cv2
 
 
@@ -137,9 +139,12 @@ class GameManager:
         """
         self.players = None
         self.num_players = None
-        self.capture.release()
-        self.capture = None
-        cv2.destroyAllWindows()
+
+        if self.capture is not None:
+            self.capture.release()
+            self.capture = None
+            cv2.destroyAllWindows()
+            time.sleep(0.5)  # Wait a bit until camera is fully released.
 
         with self.game_state_lock:
             self.game_started = False

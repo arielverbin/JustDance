@@ -77,9 +77,11 @@ class GameInitializer:
             # Compares the X value of their noses.
             if len(players) > 1:
                 if keypoints[players[0]][0][1] > keypoints[players[1]][0][1]:
-                    print(f"[LOG] SWITCHED PLACES: first one: {keypoints[players[0]][0][1]:.4f}"
+                    print(f"[LOG] SWITCHED PLACES, players: {players}: first one: {keypoints[players[0]][0][1]:.4f}"
                           f" and second {keypoints[players[1]][0][1]:.4f}.")
                     players.reverse()
+                    print(f"[LOG] NEW PLACES, players: {players}: first one: {keypoints[players[0]][0][1]:.4f}"
+                          f" and second {keypoints[players[1]][0][1]:.4f}.")
 
             with self.lock:
 

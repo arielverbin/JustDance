@@ -76,8 +76,8 @@ class HomePageState extends State<HomePage> {
     if (gameStarted) return;
 
     AudioPlayer audioPlayer = AudioPlayer();
-    await audioPlayer.setVolume(0.5);
-    await audioPlayer.play(
+    audioPlayer.setVolume(0.6);
+    audioPlayer.play(
         AssetSource('sound-effects/game-start.mp3'));
 
     setState(() {
@@ -236,10 +236,10 @@ class HomePageState extends State<HomePage> {
                             viewportFraction: 0.8,
                             enlargeCenterPage: true,
                             aspectRatio: 1 / 1,
-                            onPageChanged: (index, reason) async {
+                            onPageChanged: (index, reason) {
                               AudioPlayer audioPlayer = AudioPlayer();
-                              await audioPlayer.setVolume(0.3);
-                              await audioPlayer.play(
+                              audioPlayer.setVolume(0.4);
+                              audioPlayer.play(
                                   AssetSource('sound-effects/whoosh.mp3'));
                             },
                             scrollDirection: Axis.vertical,
