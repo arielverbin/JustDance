@@ -12,6 +12,7 @@ class FeedbackWidget extends StatefulWidget {
 
 class FeedbackWidgetState extends State<FeedbackWidget>
     with SingleTickerProviderStateMixin {
+
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _slideAnimation;
@@ -25,7 +26,10 @@ class FeedbackWidgetState extends State<FeedbackWidget>
   @override
   void didUpdateWidget(covariant FeedbackWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    print("Widget text  =  " + widget.text);
+    print("OLD Widget text  =  " + oldWidget.text);
     if (oldWidget.text != widget.text || oldWidget.color != widget.color) {
+      print("wow");
       _controller.reset();
       _controller.forward();
     }
@@ -75,6 +79,9 @@ class FeedbackWidgetState extends State<FeedbackWidget>
 
   @override
   Widget build(BuildContext context) {
+    print("Widget text 2 =  " + widget.text);
+    print("Widget color 2 =  " + widget.color.toString());
+
     return FadeTransition(
       opacity: _opacityAnimation,
       child: SlideTransition(
