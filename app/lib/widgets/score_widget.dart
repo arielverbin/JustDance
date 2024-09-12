@@ -43,7 +43,6 @@ class ScoreWidgetState extends State<ScoreWidget> {
   }
 
   (String, Color) scoreToFeedback(int value) {
-    print("value = " + value.toString());
     if (value >= 80) {
       return ("PERFECT", Colors.cyanAccent);
     } else if (value >= 60) {
@@ -103,11 +102,7 @@ class ScoreWidgetState extends State<ScoreWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print("score = " + score.toString());
     var (feedback, color) = scoreToFeedback(score);
-    print("feedback = " + feedback.toString());
-    print("color = " + color.toString());
-
     var scoreTitleWidget = getScoreTitle();
 
     List<Widget> rowChildren = [
