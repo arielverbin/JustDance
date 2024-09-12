@@ -87,7 +87,7 @@ class PoseSequenceScore:
         """
         return self.score_method.convert_to_score(value)
 
-    def compare(self, pose, time):
+    def compare(self, pose, time, preprocessed=False):
         """
         Calculating the weight between the given pose and poses around the given time.
         Each score will be given a weight according to their offset from the actual time.
@@ -99,15 +99,19 @@ class PoseSequenceScore:
                 The pose that will be scored.
             time: float
                 The time in which the pose took place.
+            preprocessed: bool
+                Whether pose is in preprocessed format or not.
         Returns:
             float
                 the similarity between the pose in the given time, to the sequence of poses in this given time.
         """
         window = self.target_poses.get_subsequence(time, self.window_duration)
 
+        preprocessed_pose = pose if preprocessed else self.score_method.process_target(pose)
+
         best, punished = 100, 0
         for target, weight in zip(window, self.weights):
-            current_score = self.score_method.compare(target, pose) + weight
+            current_score = self.score_method.compare_preprocessed(target, preprocessed_pose) + weight
             if current_score < best:
                 best = current_score
                 punished = weight
