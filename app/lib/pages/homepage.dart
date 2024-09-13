@@ -95,6 +95,7 @@ class HomePageState extends State<HomePage> {
     final gameRequest = GameRequest(
       songTitle: song.name,
       numberOfPlayers: numberOfPlayers,
+      cameraAngle: cameraAngle,
       gameSpeed: 1,
     );
 

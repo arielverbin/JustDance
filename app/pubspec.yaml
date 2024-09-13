@@ -16,9 +16,9 @@ dependencies:
   flutter_webrtc: ^0.11.7
   video_player: ^2.8.7
   fl_chart: ^0.69.0
-  grpc: ^3.2.4
+  grpc: ^4.0.1
   path: ^1.9.0
-  path_provider: ^2.1.3
+  path_provider: ^2.1.4
   protobuf: ^3.1.0
   carousel_slider: ^4.2.1
 

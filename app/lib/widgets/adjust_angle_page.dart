@@ -15,6 +15,8 @@ class AdjustCameraAnglePageState extends State<AdjustCameraAnglePage> {
   late double _scaledPosition;
   double _startPosition = 0.0;
 
+  late bool changedAngle = false;
+
   List<String> clarifications = [
     "Your camera is on the ground.",
     "Your camera is positioned below you.",
@@ -143,6 +145,7 @@ class AdjustCameraAnglePageState extends State<AdjustCameraAnglePage> {
                         onPanStart: (details) {
                           // Track the initial position of the dot
                           _startPosition = _cameraPosition;
+                          changedAngle = true;
                         },
                         onPanUpdate: (details) {
                           setState(() {
@@ -198,15 +201,15 @@ class AdjustCameraAnglePageState extends State<AdjustCameraAnglePage> {
                 onTap: () {
                   Navigator.pop(context); // Pop the current screen
                 },
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.arrow_back, color: Colors.white),
-                    SizedBox(
+                    const Icon(Icons.arrow_back, color: Colors.white),
+                    const SizedBox(
                       width: 10,
                     ),
                     Text(
-                      "Save & Back to Song List",
-                      style: TextStyle(
+                      "${changedAngle ? "Save & " : ""}Back to Song List",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w300,

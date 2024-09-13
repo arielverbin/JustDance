@@ -12,3 +12,7 @@ def load_from(store_file):
     """
     with open(store_file, 'rb') as file:
         return pickle.load(file)
+
+
+def load_song(song_title, player_angle):
+    return load_from(f"./Songs/{song_title}.pkl")
