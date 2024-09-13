@@ -1,73 +1,55 @@
+import 'package:app/widgets/character_pick_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:app/widgets/adjust_angle_page.dart';
+import 'package:app/widgets/about_just_dance.dart';
+import 'camera_widget.dart';
 
 class SettingWidget extends StatefulWidget {
-  final int numberOfPlayers;
-  final ValueChanged<int> onNumberOfPlayersChanged;
+  final Function(List<String>) updatePlayerSelections; // Add the callback
+  final Function(double) updateCameraAngle;
+  final double cameraAngle;
 
   const SettingWidget({
-    Key? key,
-    required this.numberOfPlayers,
-    required this.onNumberOfPlayersChanged,
-  }) : super(key: key);
+    super.key,
+    required this.updatePlayerSelections, // Initialize in constructor
+    required this.updateCameraAngle,
+    required this.cameraAngle
+  });
 
   @override
-  _SettingWidgetState createState() => _SettingWidgetState();
+  SettingWidgetState createState() => SettingWidgetState();
 }
 
-class _SettingWidgetState extends State<SettingWidget> {
-  late int _selectedNumberOfPlayers;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedNumberOfPlayers = widget.numberOfPlayers;
-  }
+class SettingWidgetState extends State<SettingWidget> {
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Text(
-          'NUMBER OF PLAYERS',
-          style: TextStyle(color: Colors.white,
+        children: [
+          const Text(
+            'CHARACTERS',
+            style: TextStyle(
+              color: Colors.white,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w700,
-              fontSize: 18),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Radio<int>(
-              value: 1,
-              groupValue: _selectedNumberOfPlayers,
-              onChanged: (value) {
-                setState(() {
-                  _selectedNumberOfPlayers = value!;
-                  widget.onNumberOfPlayersChanged(_selectedNumberOfPlayers);
-                });
-              },
+              fontSize: 18,
             ),
-            Text(
-              '1',
-              style: TextStyle(color: Colors.white),
-            ),
-            Radio<int>(
-              value: 2,
-              groupValue: _selectedNumberOfPlayers,
-              onChanged: (value) {
-                setState(() {
-                  _selectedNumberOfPlayers = value!;
-                  widget.onNumberOfPlayersChanged(_selectedNumberOfPlayers);
-                });
-              },
-            ),
-            Text(
-              '2',
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 10),
+          CharacterPickWidget(
+            updatePlayerSelections:
+            widget.updatePlayerSelections, // Forward the callback
+          ),
+          const SizedBox(height: 16),
+          const CameraWidget(),
+          const SizedBox(height: 16),
+          AdjustAngleWidget(
+            updateCameraAngle: widget.updateCameraAngle,
+            cameraAngle: widget.cameraAngle
+          ),
+          const SizedBox(height: 26),
+          const AboutJustDance(),
+        ],
     );
   }
 }

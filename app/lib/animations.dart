@@ -36,7 +36,7 @@ class AnimationsTestingState extends State<AnimationTesting> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const GameStartPage(numberOfPlayers: 1, songTitle: "fefefe", playerNames: [])));
+                        builder: (context) => const GameStartPage(numberOfPlayers: 1, songName: "fefefe", playerNames: [])));
               },
               child: const Text('Game Start')),
 
@@ -45,22 +45,11 @@ class AnimationsTestingState extends State<AnimationTesting> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const InGamePage(songTitle: "random",
+                        builder: (context) => const InGamePage(songName: "random",
                         numberOfPlayers: 2, playerNames: ["susan", "ava"],)));
               },
               child: const Text('Video Player')),
 
-          ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => WinnerPage(
-                          scores : const [42340,245297],
-                          players: const ["susan", "liam"],)
-                    ));
-              },
-              child: const Text('Winner Page'))
         ],
       )),
     );

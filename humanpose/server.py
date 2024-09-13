@@ -16,7 +16,7 @@ def serve(port):
   health_pb2_grpc.add_HealthServicer_to_server(health.HealthServicer(), server)
 
   server.add_insecure_port(HOST)
-  print(f"gRPC server started and listening on {HOST}")
+  print(f"[#] gRPC server started and listening on {HOST}")
   server.start()
   server.wait_for_termination()
 
@@ -25,4 +25,5 @@ if __name__ == '__main__':
   DEFAULT_PORT = 50055
   port = int(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_PORT
   print(f"[#] Server is listening on {port}.")
+  print("-----------------------------------------")
   serve(port)

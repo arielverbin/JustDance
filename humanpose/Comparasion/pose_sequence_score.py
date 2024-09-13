@@ -109,14 +109,13 @@ class PoseSequenceScore:
 
         preprocessed_pose = pose if preprocessed else self.score_method.process_target(pose)
 
-        best, punished = 100, 0
+        best = 100
         for target, weight in zip(window, self.weights):
             current_score = self.score_method.compare_preprocessed(target, preprocessed_pose) + weight
             if current_score < best:
                 best = current_score
-                punished = weight
 
-        return best, punished
+        return best
 
 
 # Example usage

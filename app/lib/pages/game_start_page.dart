@@ -1,228 +1,275 @@
+import 'dart:async';
 import 'package:app/pages/in_game_page.dart';
+import 'package:app/utils/service/client.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
+import 'dart:math';
 
 import '../widgets/gradient_text.dart';
+import 'package:app/utils/service/service.pbgrpc.dart';
 
 class GameStartPage extends StatefulWidget {
   final int numberOfPlayers;
   final List<String> playerNames;
-  final String songTitle;
+  final String songName;
 
-  const GameStartPage(
-      {super.key,
-      required this.numberOfPlayers,
-      required this.songTitle,
-      required this.playerNames});
+  const GameStartPage({
+    super.key,
+    required this.numberOfPlayers,
+    required this.songName,
+    required this.playerNames,
+  });
 
   @override
   GameStartState createState() => GameStartState();
 }
 
 class GameStartState extends State<GameStartPage> {
+  late int playersLeft = 2;
+  bool _isPolling = true;
+  bool canceling = false;
+  late List<String> tips = [
+    "Make sure that throughout the game all players are fully visible for the camera.",
+    "Optimize your camera setup with good lighting and a clear background.",
+    "Throughout the game, stand in front of the camera and face it directly.",
+    "Switching places with other players might confuse the scoring mechanism."
+  ];
+
+  int _currentTipIndex = 0;
+  double _opacity = 1.0;
+  late Timer _timer;
+
   @override
   void initState() {
     super.initState();
+    playersLeft = widget.numberOfPlayers;
+    tips.shuffle(Random());
+
     _waitForGameStart();
+
+    _timer = Timer.periodic(const Duration(seconds: 6), (Timer timer) {
+      setState(() {
+        _opacity = 0.0;
+      });
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _currentTipIndex = (_currentTipIndex + 1) % tips.length;
+            _opacity = 1.0;
+          });
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _isPolling = false;
+    super.dispose();
   }
 
   void _waitForGameStart() async {
-    await Future.delayed(const Duration(seconds: 50));
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InGamePage(
-              songTitle: widget.songTitle,
-              numberOfPlayers: widget.numberOfPlayers,
-              playerNames: widget.playerNames),
-        ),
-      );
+    final client = ScoringPoseServiceClient(getClientChannel());
+    AudioPlayer audioPlayer = AudioPlayer();
+    audioPlayer.setVolume(0.6);
+
+    while (_isPolling) {
+      try {
+        final response = await client.startGame(EmptyMessage(status: ""));
+        if (mounted) {
+
+          int newPlayersLeft =  widget.numberOfPlayers - response.numberOfPlayers;
+          int oldPlayersLeft = playersLeft;
+
+          setState(() {
+            // TODO: too many are raising their hands!
+            playersLeft = newPlayersLeft;
+          });
+
+          if(newPlayersLeft > 0) {
+            if (newPlayersLeft > oldPlayersLeft) {
+              audioPlayer.play(
+                  AssetSource('sound-effects/players-decrease.mp3'));
+            } else if (newPlayersLeft < oldPlayersLeft) {
+              audioPlayer.play(
+                  AssetSource('sound-effects/players-increase.mp3'));
+            }
+          }
+
+          if (response.status == "ready") {
+
+            audioPlayer.play(AssetSource('sound-effects/game-on.mp3'));
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InGamePage(
+                  songName: widget.songName,
+                  numberOfPlayers: widget.numberOfPlayers,
+                  playerNames: widget.playerNames,
+                ),
+              ),
+            );
+            break; // Exit the loop
+          }
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
     }
+  }
+
+  void _cancelGame() async {
+    _isPolling = false;
+    if (canceling) return;
+
+    setState(() {
+      canceling = true;
+    });
+
+    ScoringPoseServiceClient(getClientChannel())
+        .startGame(EmptyMessage(status: 'cancel'))
+        .then((response) {
+      if (response.status == "canceled") {
+        Navigator.pop(context);
+      } else {
+        Navigator.pop(context);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B1215),
-      body: Stack(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly
-              ,crossAxisAlignment: CrossAxisAlignment.start, children: [
-            /** First Instruction **/
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-
-                    flutter.Image.asset(
-                      'assets/images/stay-in-frame.gif',
-                      height: 100,
+      body: Stack(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              flutter.Image.asset(
+                'assets/images/raise-hands.gif',
+                height: 220,
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Ready? Raise Your Hands!",
+                    style: TextStyle(
+                      fontSize: 30.0,
+                      overflow: TextOverflow.ellipsis,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Poppins',
                     ),
-                    const SizedBox(width: 3,),
-                    const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Stay In Frame",
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            overflow: TextOverflow.ellipsis,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        Text(
-                          "For accurate scoring, make sure that throughout the game\nall players are fully visible for the camera.",
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w300,
-                            fontFamily: 'Poppins',
-                          ),
-                        )
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  const Text(
+                    "Keep your hands raised. The game will start when",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                  GradientText(
+                    playersLeft == 0
+                        ? "STARTING..."
+                        : (playersLeft == 1
+                            ? "1 MORE PLAYER"
+                            : (playersLeft < 0 ? "TOO MANY PLAYERS" : "$playersLeft MORE PLAYERS")),
+                    style: const TextStyle(
+                      fontSize: 50.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Poppins',
+                    ),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xff6793e1),
+                        Color(0xff7564e1),
+                        Color(0xffC65BCF),
+                        Color(0xffF27BBD),
                       ],
                     ),
-                  ],
-                ),
-
-            /** Second Instruction**/
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                flutter.Image.asset(
-                  'assets/images/raise-hands.gif',
-                  height: 100,
-                ),
-                const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Perfect Your Dance Space",
-                      style: TextStyle(
-                        fontSize: 30.0,
-                        overflow: TextOverflow.ellipsis,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                      ),
+                  ),
+                  Text(
+                    playersLeft == 1
+                        ? " is raising their hands."
+                        : (playersLeft == 2 ? " are raising their hands." : ""),
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
+                      fontFamily: 'Poppins',
                     ),
-                    Text(
-                      "For best capture, optimize your camera setup with good\nlighting and a clear background.",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
-                        fontFamily: 'Poppins',
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-
-            /** Third Instruction**/
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                flutter.Image.asset(
-                  'assets/images/raise-hands.gif',
-                  height: 100,
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Ready? Raise Your Hands!",
-                      style: TextStyle(
-                        fontSize: 30.0,
-                        overflow: TextOverflow.ellipsis,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                      ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: MediaQuery.of(context).size.height * 0.08,
+            left: 20,
+            right: 20,
+            child: SizedBox(
+              height: 50,
+              child: Center(
+                child: AnimatedOpacity(
+                  opacity: _opacity,
+                  duration: const Duration(milliseconds: 500),
+                  child: Text(
+                    tips[_currentTipIndex],
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white54,
+                      fontWeight: FontWeight.w300,
+                      fontFamily: 'Poppins',
                     ),
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.numberOfPlayers == 1 ?
-                            "Please keep your hands raised. The game will start when" : "Please keep your hands raised.",
-                            style: const TextStyle(
-                              fontSize: 20.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w300,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          Row(children: [
-                            GradientText(
-                              widget.numberOfPlayers == 1
-                                  ? "1 MORE PLAYER"
-                                  : "STARTING...",
-                              style: const TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'Poppins',
-                              ),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xff6793e1),
-                                  Color(0xff7564e1),
-                                  Color(0xffC65BCF),
-                                  Color(0xffF27BBD),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              widget.numberOfPlayers == 1
-                                  ? " is raising their hands."
-                                  : "",
-                              style: const TextStyle(
-                                fontSize: 20.0,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w300,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                          ]),
-                        ])
-                  ],
-                ),
-              ],
-            ),
-          ])
-        ]),
-        Positioned(
-          top: 20,
-          left: 20,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.pop(context); // Pop the current screen
-            },
-            child: const Row(
-              children: [
-                Icon(Icons.arrow_back, color: Colors.white),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(
-                  "Back to Song List",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w300,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ]),
+          Positioned(
+            top: 20,
+            left: 20,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  _cancelGame();
+                },
+                child: Row(
+                  children: [
+                    const Icon(Icons.arrow_back, color: Colors.white),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      canceling ? "Canceling..." : "Back to Song List",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

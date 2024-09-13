@@ -1,9 +1,5 @@
 import cv2
 import numpy as np
-from Inference.vit_inference import VitInference
-from Utils.game_manager import GameManager
-from Comparasion.angular_score import AngularScore
-from Utils.game_initializer import GameInitializer
 
 
 def draw_keypoints(player_dict):
@@ -34,14 +30,14 @@ def draw_keypoints(player_dict):
     cv2.destroyAllWindows()
 
 
-model_path = '../Inference/weights/vitpose-b-coco.pth'
-yolo_path = '../Inference/weights/yolov5su.pt'
-model = VitInference(model_path, yolo_path)
-game_manager = GameManager(inference_model=model)
-
-game_manager.init_camera()
-
-game_init = GameInitializer(game_manager, numer_players=1)
-print("#########################\n########  GAME  #########\n#########################\n",
-      game_init.init_game(starting_pose=GameInitializer.RAISING_HAND_POSE, threshold=30))
-
+# model_path = '../Inference/weights/vitpose-b-coco.pth'
+# yolo_path = '../Inference/weights/yolov5su.pt'
+# model = VitInference(model_path, yolo_path)
+# game_manager = GameManager(inference_model=model)
+#
+# game_manager.init_camera()
+#
+# game_init = GameInitializer(game_manager, numer_players=1)
+# print("#########################\n########  GAME  #########\n#########################\n",
+#       game_init.init_game(starting_pose=GameInitializer.RAISING_HAND_POSE, threshold=30))
+#
