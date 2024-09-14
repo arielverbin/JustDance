@@ -7,13 +7,11 @@ import 'camera_widget.dart';
 class SettingWidget extends StatefulWidget {
   final Function(List<String>) updatePlayerSelections; // Add the callback
   final Function(double) updateCameraAngle;
-  final double cameraAngle;
 
   const SettingWidget({
     super.key,
     required this.updatePlayerSelections, // Initialize in constructor
     required this.updateCameraAngle,
-    required this.cameraAngle
   });
 
   @override
@@ -45,7 +43,6 @@ class SettingWidgetState extends State<SettingWidget> {
           const SizedBox(height: 16),
           AdjustAngleWidget(
             updateCameraAngle: widget.updateCameraAngle,
-            cameraAngle: widget.cameraAngle
           ),
           const SizedBox(height: 26),
           const AboutJustDance(),

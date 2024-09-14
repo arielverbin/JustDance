@@ -8,7 +8,6 @@ import 'package:app/pages/homepage.dart';
 import 'package:app/utils/service/client.dart';
 import 'package:app/utils/service/init_py.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
-import 'package:app/animations.dart';
 
 import 'package:flutter/material.dart';
 

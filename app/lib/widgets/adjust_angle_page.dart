@@ -1,3 +1,4 @@
+import 'package:app/app_storage.dart';
 import 'package:flutter/material.dart';
 
 class AdjustCameraAnglePage extends StatefulWidget {
@@ -25,21 +26,25 @@ class AdjustCameraAnglePageState extends State<AdjustCameraAnglePage> {
   ];
   late int clarifyIndex;
 
+  static int getClarifyIndex(double angle) {
+    if (angle == 0) {
+      return 0;
+    } else if (angle < 0.45) {
+      return 1;
+    } else if (angle < 0.7) {
+      return 2;
+    } else {
+      return 3;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _scaledPosition = widget.startingCameraAngle;
     _cameraPosition = widget.startingCameraAngle * (700 - 15);
 
-    if (_scaledPosition == 0) {
-      clarifyIndex = 0;
-    } else if (_scaledPosition < 0.45) {
-      clarifyIndex = 1;
-    } else if (_scaledPosition < 0.7) {
-      clarifyIndex = 2;
-    } else {
-      clarifyIndex = 3;
-    }
+    clarifyIndex = getClarifyIndex(_scaledPosition);
 
   }
 
@@ -162,17 +167,8 @@ class AdjustCameraAnglePageState extends State<AdjustCameraAnglePage> {
                             _cameraPosition = newPosition;
                             _scaledPosition = _cameraPosition / (700 - 15);
 
-                            widget.updateCameraAngleAndText(_scaledPosition);
+                            clarifyIndex = getClarifyIndex(_scaledPosition);
 
-                            if (_scaledPosition == 0) {
-                              clarifyIndex = 0;
-                            } else if (_scaledPosition < 0.45) {
-                              clarifyIndex = 1;
-                            } else if (_scaledPosition < 0.7) {
-                              clarifyIndex = 2;
-                            } else {
-                              clarifyIndex = 3;
-                            }
                           });
                         },
                         onPanEnd: (details) {
@@ -226,13 +222,10 @@ class AdjustCameraAnglePageState extends State<AdjustCameraAnglePage> {
 
 class AdjustAngleWidget extends StatefulWidget {
   final Function(double) updateCameraAngle;
-  final double cameraAngle;
-
 
   const AdjustAngleWidget({
     super.key,
     required this.updateCameraAngle,
-    required this.cameraAngle
   });
 
   @override
@@ -240,6 +233,10 @@ class AdjustAngleWidget extends StatefulWidget {
 }
 
 class AdjustAngleWidgetState extends State<AdjustAngleWidget> {
+  late double cameraAngle = 0.5;
+  late int clarifyIndex = 2;
+
+  final AppStorage appStorage = AppStorage();
   final List<String> clarifications = const [
     "Your camera is on the ground.",
     "Your camera is positioned below you.",
@@ -247,35 +244,40 @@ class AdjustAngleWidgetState extends State<AdjustAngleWidget> {
     "Your camera is positioned above you."
   ];
 
-  int clarifyIndex = 2;
+
+  @override
+  void initState(){
+    super.initState();
+    loadCameraAngle();
+  }
+
+  Future<void> loadCameraAngle() async {
+    final loadedAngle = await appStorage.loadCameraAngle();
+
+    updateCameraAngleAndText(loadedAngle);
+  }
 
   void _openAdjustAnglePage(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AdjustCameraAnglePage(
             updateCameraAngleAndText: updateCameraAngleAndText,
-            startingCameraAngle: widget.cameraAngle
+            startingCameraAngle: cameraAngle
         ),
       ),
     );
   }
 
+
   void updateCameraAngleAndText(double newAngle) {
     widget.updateCameraAngle(newAngle);
+    int newIndex = AdjustCameraAnglePageState.getClarifyIndex(newAngle);
 
-    int newIndex;
-    if (newAngle == 0) {
-      newIndex = 0;
-    } else if (newAngle < 0.45) {
-      newIndex = 1;
-    } else if (newAngle < 0.7) {
-      newIndex = 2;
-    } else {
-      newIndex = 3;
-    }
+    appStorage.saveCameraAngle(newAngle);
 
     setState(() {
-      clarifyIndex = newIndex; // Update the state
+      cameraAngle = newAngle;
+      clarifyIndex = newIndex;
     });
   }
 

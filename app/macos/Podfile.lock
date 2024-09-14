@@ -13,6 +13,9 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - video_player_avfoundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -24,6 +27,7 @@ DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
   - fvp (from `Flutter/ephemeral/.symlinks/plugins/fvp/darwin`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
   - video_player_avfoundation (from `Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin`)
 
 SPEC REPOS:
@@ -42,6 +46,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/fvp/darwin
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
   video_player_avfoundation:
     :path: Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin
 
@@ -52,6 +58,7 @@ SPEC CHECKSUMS:
   fvp: 6e4e1f45b22816d81da8f565799a13e05e9b3383
   mdk: 66f31cfd10f1339837797c95842cd6ce3466ff4e
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   WebRTC-SDK: c3d69a87e7185fad3568f6f3cff7c9ac5890acf3
 

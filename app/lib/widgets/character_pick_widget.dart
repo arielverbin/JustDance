@@ -1,3 +1,4 @@
+import 'package:app/app_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -12,12 +13,39 @@ class CharacterPickWidget extends StatefulWidget {
 }
 
 class CharacterPickWidgetState extends State<CharacterPickWidget> {
-  String firstSlotCharacter = "ava";
-  String? secondSlotCharacter;
+  final AppStorage appStorage = AppStorage();
+
+  late String firstSlotCharacter = "ava";
+  late String secondSlotCharacter = "susan";
 
   final List<String> characters = [
     'ava', 'caleb', 'emily', 'liam', 'noah', 'susan'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadChosenCharacters();
+  }
+
+  Future<void> loadChosenCharacters() async {
+    final loadedPlayers = await appStorage.loadChosenCharacters();
+
+    updateChosenCharacters(loadedPlayers[0], loadedPlayers[1]);
+  }
+
+  void updateChosenCharacters(String player1, String player2) {
+    final newPlayers = player2 == "none" ? [player1] : [player1, player2];
+
+    widget.updatePlayerSelections(newPlayers);
+    appStorage.saveChosenCharacters(player1, player2);
+
+    setState(() {
+      firstSlotCharacter = player1;
+      secondSlotCharacter = player2;
+    });
+  }
 
   void _openCharacterPicker(BuildContext context, bool isFirstSlot) {
     showDialog(
@@ -48,22 +76,11 @@ class CharacterPickWidgetState extends State<CharacterPickWidget> {
                 String character = availableCharacters[index];
                 return GestureDetector(
                   onTap: () {
-                    setState(() {
-                      if (isFirstSlot) {
-                        firstSlotCharacter = character;
-                      } else {
-                        secondSlotCharacter = character == 'none' ? null : character;
-                      }
-                    });
-
-                    // Update the selected characters
-                    List<String> selectedPlayers = [firstSlotCharacter];
-                    if (secondSlotCharacter != null) {
-                      selectedPlayers.add(secondSlotCharacter!);
-                    }
+                    final firstCharacter = isFirstSlot ? character : firstSlotCharacter;
+                    final secondCharacter = isFirstSlot ? secondSlotCharacter : character;
 
                     // Trigger the callback
-                    widget.updatePlayerSelections(selectedPlayers);
+                    updateChosenCharacters(firstCharacter, secondCharacter);
 
                     Navigator.of(context).pop();
                   },

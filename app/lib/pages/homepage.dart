@@ -52,12 +52,15 @@ class HomePageState extends State<HomePage> {
     setState(() {
       playerNames = selectedPlayers;
       numberOfPlayers = selectedPlayers.length;
+      print(playerNames);
+      print(numberOfPlayers);
     });
   }
 
   void updateCameraAngle(double newAngle) {
     setState(() {
       cameraAngle = newAngle;
+      print(cameraAngle);
     });
   }
 
@@ -209,7 +212,6 @@ class HomePageState extends State<HomePage> {
                         SettingWidget(
                             updatePlayerSelections: updatePlayerSelections,
                             updateCameraAngle: updateCameraAngle,
-                            cameraAngle: cameraAngle,
                         ),
                       ],
                     ),
