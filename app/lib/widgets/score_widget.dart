@@ -65,7 +65,6 @@ class ScoreWidgetState extends State<ScoreWidget> {
   }
 
   Widget getScoreTitle() {
-
     var nameWidget = Text(
       capitalize(widget.playerName),
       style: const TextStyle(
@@ -89,7 +88,7 @@ class ScoreWidgetState extends State<ScoreWidget> {
       ),
     );
 
-    if(widget.playerIndex == -1) {
+    if (widget.playerIndex == -1) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [scoreWidget, const SizedBox(width: 10), nameWidget],
