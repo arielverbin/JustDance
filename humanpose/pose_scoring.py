@@ -1,6 +1,6 @@
 import time
 
-from Utils.load_utils import load_from
+from Utils.load_utils import load_from, load_song
 from Utils.game_manager import GameManager
 from Utils.game_utils import track_players, score_dance
 from Utils.game_initializer import GameInitializer
@@ -71,7 +71,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         if song_title not in self.song_list:
             return service_pb2.GameStatus(numberOfPlayers=0, status="not found")
 
-        pose_sequence = load_from(f"./Songs/{song_title}.pkl")
+        pose_sequence = load_song(song_title, request.cameraAngle)
+        print("done with this")
 
         target_sequence = PoseSequence(pose_sequence, fps=10)
         weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}
@@ -147,7 +148,9 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
 
         score1, score2 = self.fetch_scores(final=False)
 
-        print(f"[LOG] DONE with getScore (score1={score1[0]}, totalScore1={score1[1]})")
+        print(f"[LOG] DONE with getScore (score1={score1[0]}, totalScore1={score1[1]}, "
+              f"score2={score2[0]}, totalScore2={score2[1]})")
+
         print("-----------------------------------------")
         return service_pb2.ScoreResponse(score1=int(score1[0]),
                                          totalScore1=int(score1[1]),
@@ -167,7 +170,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.end_game()
         winner = 0 if score1[1] > score2[1] else 1
 
-        print(f"[LOG] DONE with endGame (winner: {winner}, totalScore1: {score1[1]})")
+        print(f"[LOG] DONE with endGame (winner: {winner}, totalScore1: {score1[1]}, totalScore2: {score2[1]})")
         print("-----------------------------------------")
         return service_pb2.EndStatus(status="success",
                                      winner=winner,
@@ -193,8 +196,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         """
             Get the current player's scores.
             Args:
-                final:  Whether the scores should be considered as final or not. If final is false, the method will wait until
-                        new score arrives since last call.
+                final:  Whether the scores should be considered as final or not. If final is false,
+                        the method will wait until new score arrives since last call.
             Returns:
                 two tuples, each tuple contains a player's last and total score.
         """
@@ -212,5 +215,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         p2 = players[1] if len(players) > 1 and players[1] is not None else None
         score1 = score[p1] if score[p1] is not None else (0, 0)
         score2 = score[p2] if p2 is not None else (0, 0)
+
+        print(f"Player1 is with ID: {p1}, Player2 is with ID: {p2}")
 
         return score1, score2

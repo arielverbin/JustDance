@@ -13,3 +13,7 @@ class PoseScore(ABC):
     @abstractmethod
     def compare(self, preprocessed_target, pose):
         pass
+
+    @abstractmethod
+    def compare_preprocessed(self, preprocessed_target, preprocessed_pose):
+        pass

@@ -35,9 +35,11 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageState> _homepageKey = GlobalKey();
   late CarouselController _carouselController;
   late bool gameStarted = false;
+  late double cameraAngle = 0;
 
   late int numberOfPlayers;
   List<String> playerNames = ['ava'];
+
 
   @override
   void initState() {
@@ -50,6 +52,12 @@ class HomePageState extends State<HomePage> {
     setState(() {
       playerNames = selectedPlayers;
       numberOfPlayers = selectedPlayers.length;
+    });
+  }
+
+  void updateCameraAngle(double newAngle) {
+    setState(() {
+      cameraAngle = newAngle;
     });
   }
 
@@ -75,17 +83,19 @@ class HomePageState extends State<HomePage> {
   Future<void> _loadGameAndStart(BuildContext context, Song song) async {
     if (gameStarted) return;
 
-    AudioPlayer audioPlayer = AudioPlayer();
-    await audioPlayer.setVolume(0.5);
-    await audioPlayer.play(
-        AssetSource('sound-effects/game-start.mp3'));
-
     setState(() {
       gameStarted = true;
     });
+
+    AudioPlayer audioPlayer = AudioPlayer();
+    audioPlayer.setVolume(0.6);
+    audioPlayer.play(
+        AssetSource('sound-effects/game-start.mp3'));
+
     final gameRequest = GameRequest(
       songTitle: song.name,
       numberOfPlayers: numberOfPlayers,
+      cameraAngle: cameraAngle,
       gameSpeed: 1,
     );
 
@@ -197,7 +207,10 @@ class HomePageState extends State<HomePage> {
                           height: 30,
                         ),
                         SettingWidget(
-                            updatePlayerSelections: updatePlayerSelections),
+                            updatePlayerSelections: updatePlayerSelections,
+                            updateCameraAngle: updateCameraAngle,
+                            cameraAngle: cameraAngle,
+                        ),
                       ],
                     ),
                   ),
@@ -236,10 +249,10 @@ class HomePageState extends State<HomePage> {
                             viewportFraction: 0.8,
                             enlargeCenterPage: true,
                             aspectRatio: 1 / 1,
-                            onPageChanged: (index, reason) async {
+                            onPageChanged: (index, reason) {
                               AudioPlayer audioPlayer = AudioPlayer();
-                              await audioPlayer.setVolume(0.3);
-                              await audioPlayer.play(
+                              audioPlayer.setVolume(0.4);
+                              audioPlayer.play(
                                   AssetSource('sound-effects/whoosh.mp3'));
                             },
                             scrollDirection: Axis.vertical,
@@ -257,3 +270,4 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
+

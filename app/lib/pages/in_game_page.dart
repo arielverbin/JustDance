@@ -69,32 +69,30 @@ class InGamePageState extends State<InGamePage> {
   }
 
   // Function to maintain the scores, updating them in a loop
-  // Function to maintain the scores, updating them in a loop every 500ms
-  void _maintainScore() {
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (!_inGame) {
-        timer.cancel(); // Stop the timer if the game is no longer running
-        return;
-      }
+  void _maintainScore() async {
+    double timePassed;
 
-      double timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
-
+    while (_inGame) {
+      // Check if the widget is mounted before running the loop
       var (newScores, newTotalScores) = await _getScore(); // Get new scores
+
+      timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
       plotScoresPlayer1.add(FlSpot(timePassed, newScores[0].toDouble()));
       plotScoresPlayer2.add(FlSpot(timePassed, newScores[1].toDouble()));
 
-      // Check if the widget is mounted before calling setState
-      if (mounted && _inGame) {
+      if (_inGame) {
+        // Check if the widget is mounted before calling setState
         setState(() {
           for (int i = 0; i < widget.numberOfPlayers; i++) {
-            // Update the score widget with the new scores
+            scores[i] = newScores[i];
+            totalScores[i] = newTotalScores[i];
             scoreWidgetKeys[i]
                 .currentState
-                ?.updateScore(newScores[i], newTotalScores[i]);
+                ?.updateScore(scores[i], totalScores[i]);
           }
         });
       }
-    });
+    }
   }
 
   void _checkVideoEnd() async {

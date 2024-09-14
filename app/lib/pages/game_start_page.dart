@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:app/pages/in_game_page.dart';
 import 'package:app/utils/service/client.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'dart:math';
@@ -72,17 +73,36 @@ class GameStartState extends State<GameStartPage> {
 
   void _waitForGameStart() async {
     final client = ScoringPoseServiceClient(getClientChannel());
+    AudioPlayer audioPlayer = AudioPlayer();
+    audioPlayer.setVolume(0.6);
 
     while (_isPolling) {
       try {
         final response = await client.startGame(EmptyMessage(status: ""));
         if (mounted) {
+
+          int newPlayersLeft =  widget.numberOfPlayers - response.numberOfPlayers;
+          int oldPlayersLeft = playersLeft;
+
           setState(() {
             // TODO: too many are raising their hands!
-            playersLeft = widget.numberOfPlayers - response.numberOfPlayers;
+            playersLeft = newPlayersLeft;
           });
 
+          if(newPlayersLeft > 0) {
+            if (newPlayersLeft > oldPlayersLeft) {
+              audioPlayer.play(
+                  AssetSource('sound-effects/players-decrease.mp3'));
+            } else if (newPlayersLeft < oldPlayersLeft) {
+              audioPlayer.play(
+                  AssetSource('sound-effects/players-increase.mp3'));
+            }
+          }
+
           if (response.status == "ready") {
+
+            audioPlayer.play(AssetSource('sound-effects/game-on.mp3'));
+
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -165,7 +185,7 @@ class GameStartState extends State<GameStartPage> {
                         ? "STARTING..."
                         : (playersLeft == 1
                             ? "1 MORE PLAYER"
-                            : "$playersLeft MORE PLAYERS"),
+                            : (playersLeft < 0 ? "TOO MANY PLAYERS" : "$playersLeft MORE PLAYERS")),
                     style: const TextStyle(
                       fontSize: 50.0,
                       color: Colors.white,

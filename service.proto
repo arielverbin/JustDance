@@ -19,7 +19,8 @@ message LoadStatus {
 message GameRequest {
   string songTitle = 1;
   int32 numberOfPlayers = 2;
-  int32 gameSpeed = 3;
+  float cameraAngle = 3;
+  int32 gameSpeed = 4;
 }
 
 message GameStatus {

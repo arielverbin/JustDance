@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\"\x1e\n\x0c\x45mptyMessage\x12\x0e\n\x06status\x18\x01 \x01(\t\"\x1c\n\nLoadStatus\x12\x0e\n\x06status\x18\x01 \x01(\t\"L\n\x0bGameRequest\x12\x11\n\tsongTitle\x18\x01 \x01(\t\x12\x17\n\x0fnumberOfPlayers\x18\x02 \x01(\x05\x12\x11\n\tgameSpeed\x18\x03 \x01(\x05\"5\n\nGameStatus\x12\x17\n\x0fnumberOfPlayers\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\t\"\x1b\n\x0bTimeRequest\x12\x0c\n\x04time\x18\x01 \x01(\x05\"Y\n\rScoreResponse\x12\x0e\n\x06score1\x18\x01 \x01(\x05\x12\x13\n\x0btotalScore1\x18\x03 \x01(\x05\x12\x0e\n\x06score2\x18\x02 \x01(\x05\x12\x13\n\x0btotalScore2\x18\x04 \x01(\x05\"\x0c\n\nEndRequest\"U\n\tEndStatus\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0e\n\x06winner\x18\x02 \x01(\x05\x12\x13\n\x0btotalScore1\x18\x03 \x01(\x05\x12\x13\n\x0btotalScore2\x18\x04 \x01(\x05\x32\xe7\x01\n\x12ScoringPoseService\x12+\n\x0bloadService\x12\r.EmptyMessage\x1a\x0b.LoadStatus\"\x00\x12\'\n\x08loadGame\x12\x0c.GameRequest\x1a\x0b.GameStatus\"\x00\x12)\n\tstartGame\x12\r.EmptyMessage\x1a\x0b.GameStatus\"\x00\x12*\n\x08getScore\x12\x0c.TimeRequest\x1a\x0e.ScoreResponse\"\x00\x12$\n\x07\x65ndGame\x12\x0b.EndRequest\x1a\n.EndStatus\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rservice.proto\"\x1e\n\x0c\x45mptyMessage\x12\x0e\n\x06status\x18\x01 \x01(\t\"\x1c\n\nLoadStatus\x12\x0e\n\x06status\x18\x01 \x01(\t\"a\n\x0bGameRequest\x12\x11\n\tsongTitle\x18\x01 \x01(\t\x12\x17\n\x0fnumberOfPlayers\x18\x02 \x01(\x05\x12\x13\n\x0b\x63\x61meraAngle\x18\x03 \x01(\x02\x12\x11\n\tgameSpeed\x18\x04 \x01(\x05\"5\n\nGameStatus\x12\x17\n\x0fnumberOfPlayers\x18\x01 \x01(\x05\x12\x0e\n\x06status\x18\x02 \x01(\t\"\x1b\n\x0bTimeRequest\x12\x0c\n\x04time\x18\x01 \x01(\x05\"Y\n\rScoreResponse\x12\x0e\n\x06score1\x18\x01 \x01(\x05\x12\x13\n\x0btotalScore1\x18\x03 \x01(\x05\x12\x0e\n\x06score2\x18\x02 \x01(\x05\x12\x13\n\x0btotalScore2\x18\x04 \x01(\x05\"\x0c\n\nEndRequest\"U\n\tEndStatus\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0e\n\x06winner\x18\x02 \x01(\x05\x12\x13\n\x0btotalScore1\x18\x03 \x01(\x05\x12\x13\n\x0btotalScore2\x18\x04 \x01(\x05\x32\xe7\x01\n\x12ScoringPoseService\x12+\n\x0bloadService\x12\r.EmptyMessage\x1a\x0b.LoadStatus\"\x00\x12\'\n\x08loadGame\x12\x0c.GameRequest\x1a\x0b.GameStatus\"\x00\x12)\n\tstartGame\x12\r.EmptyMessage\x1a\x0b.GameStatus\"\x00\x12*\n\x08getScore\x12\x0c.TimeRequest\x1a\x0e.ScoreResponse\"\x00\x12$\n\x07\x65ndGame\x12\x0b.EndRequest\x1a\n.EndStatus\"\x00\x62\x06proto3')
 
 
 
@@ -91,17 +91,17 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _LOADSTATUS._serialized_start=49
   _LOADSTATUS._serialized_end=77
   _GAMEREQUEST._serialized_start=79
-  _GAMEREQUEST._serialized_end=155
-  _GAMESTATUS._serialized_start=157
-  _GAMESTATUS._serialized_end=210
-  _TIMEREQUEST._serialized_start=212
-  _TIMEREQUEST._serialized_end=239
-  _SCORERESPONSE._serialized_start=241
-  _SCORERESPONSE._serialized_end=330
-  _ENDREQUEST._serialized_start=332
-  _ENDREQUEST._serialized_end=344
-  _ENDSTATUS._serialized_start=346
-  _ENDSTATUS._serialized_end=431
-  _SCORINGPOSESERVICE._serialized_start=434
-  _SCORINGPOSESERVICE._serialized_end=665
+  _GAMEREQUEST._serialized_end=176
+  _GAMESTATUS._serialized_start=178
+  _GAMESTATUS._serialized_end=231
+  _TIMEREQUEST._serialized_start=233
+  _TIMEREQUEST._serialized_end=260
+  _SCORERESPONSE._serialized_start=262
+  _SCORERESPONSE._serialized_end=351
+  _ENDREQUEST._serialized_start=353
+  _ENDREQUEST._serialized_end=365
+  _ENDSTATUS._serialized_start=367
+  _ENDSTATUS._serialized_end=452
+  _SCORINGPOSESERVICE._serialized_start=455
+  _SCORINGPOSESERVICE._serialized_end=686
 # @@protoc_insertion_point(module_scope)

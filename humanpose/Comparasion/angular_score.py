@@ -76,6 +76,24 @@ class AngularScore(PoseScore):
 
         return score
 
+    def compare_preprocessed(self, preprocessed_target, preprocessed_pose):
+        """
+            Compares the two preprocessed poses using the angular method.
+            Returns:
+                (float): the comparison result (where 0 is best).
+        """
+        scores = []
+        for i in range(len(joints)):
+            angle1 = preprocessed_target[i]
+            angle2 = preprocessed_pose[i]
+            scores.append(abs(angle1 - angle2) ** self.factor)
+
+        # TODO: use weighted mean instead of normal mean
+        #  (according to probabilities - after softmax - and importance of each joint).
+        score = weighted_avg(scores, self.angles_weights) ** (1 / self.factor)
+
+        return score
+
     def convert_to_score(self, value):
         """
             Convert a comparison value to a score.

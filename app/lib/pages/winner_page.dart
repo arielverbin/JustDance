@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app/widgets/graph_widget.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -107,6 +108,12 @@ class WinnerPageState extends State<WinnerPage> {
     }
 
     Future.delayed(Duration(seconds: 2, milliseconds: delay), () {
+
+      AudioPlayer audioPlayer = AudioPlayer();
+      audioPlayer.setVolume(0.6);
+      audioPlayer.play(AssetSource('sound-effects/winning'
+          '${widget.players.length > 1 ? "" : "-singleplayer"}.mp3'));
+
       setState(() {
         _showWinnerRow = true;
         _showGraph = true;
