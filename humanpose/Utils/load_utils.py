@@ -19,5 +19,6 @@ def load_song(song_title, player_angle):
     """
     Loads a song instance and returns the pose sequences that best matches the player angle.
     """
-    song = load_from(f"./Songs/{song_title}.pkl")
-    return song.get_closest_sequence(player_angle)
+    # song = load_from(f"./Songs/{song_title}.pkl")
+    # return song.get_closest_sequence(player_angle)
+    return load_from(f"./Songs/{song_title}.pkl")

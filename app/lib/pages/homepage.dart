@@ -35,7 +35,7 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageState> _homepageKey = GlobalKey();
   late CarouselController _carouselController;
   late bool gameStarted = false;
-  late double cameraAngle = 0;
+  late double cameraAngle = 0.5;
 
   late int numberOfPlayers;
   List<String> playerNames = ['ava'];

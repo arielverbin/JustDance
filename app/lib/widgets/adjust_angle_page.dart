@@ -247,7 +247,7 @@ class AdjustAngleWidgetState extends State<AdjustAngleWidget> {
     "Your camera is positioned above you."
   ];
 
-  int clarifyIndex = 0;
+  int clarifyIndex = 2;
 
   void _openAdjustAnglePage(BuildContext context) {
     Navigator.of(context).push(
