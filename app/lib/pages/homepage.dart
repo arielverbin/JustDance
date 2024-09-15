@@ -1,28 +1,15 @@
-import 'dart:async';
-
-import 'package:app/pages/game_start_page.dart';
+import 'package:app/app_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:app/pages/game_start_page.dart';
 import 'package:app/widgets/song_card.dart';
 import 'package:app/widgets/settings_widget.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
 import 'package:app/utils/service/client.dart';
 import 'package:app/widgets/alert_widget.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:math';
 
-class Song {
-  String title;
-  String artist;
-  Map<String, int> bestScores;
-  String imageUrl;
-  String name;
-  int difficulty;
-
-  Song(this.title, this.artist, this.bestScores, this.imageUrl, this.name,
-      this.difficulty);
-}
-
-// TODO: add delay to start game right after camera preview was used (to let camera turn off).
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,55 +19,78 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  final GlobalKey<HomePageState> _homepageKey = GlobalKey();
+  final AppStorage appStorage = AppStorage();
+
   late CarouselController _carouselController;
   late bool gameStarted = false;
   late double cameraAngle = 0.5;
+  List<Song> songs = AppStorage().getSongs();
 
-  late int numberOfPlayers;
-  List<String> playerNames = ['ava'];
-
+  List<String> playerNames = ['ava', 'susan'];
+  late int numberOfPlayers = 2;
 
   @override
   void initState() {
     super.initState();
-    numberOfPlayers = 1;
     _carouselController = CarouselController();
+    _initializeSongs(); // Initialize the songs and load the best scores
   }
+
+  Future<void> _initializeSongs() async {
+    // Hard-coded song list
+    final List<Song> loadedSongs = appStorage.getSongs();
+
+    // Load best scores from SharedPreferences for each song
+    for (var song in loadedSongs) {
+      song.bestScores = await appStorage.loadBestScores(song.name);
+    }
+
+    setState(() {
+      songs = loadedSongs;
+    });
+  }
+
 
   void updatePlayerSelections(List<String> selectedPlayers) {
     setState(() {
       playerNames = selectedPlayers;
       numberOfPlayers = selectedPlayers.length;
-      print(playerNames);
-      print(numberOfPlayers);
     });
   }
 
   void updateCameraAngle(double newAngle) {
     setState(() {
       cameraAngle = newAngle;
-      print(cameraAngle);
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void clearAllScores() {
+    setState(() {
+      songs = appStorage.getSongs();
+    });
   }
 
-  void _showError(String title, String content) {
-    AlertWidget.showError(
-      context,
-      AlertWidget(
-        icon: const Icon(Icons.warning_amber_rounded,
-            color: Colors.white, size: 40.0),
-        color: Colors.grey.shade800,
-        title: title,
-        content: content,
-        duration: 2,
-      ),
-    );
+  String updateAndSaveNewScore(String songName, String player, int score) {
+    final List<Song> songsCopy = songs;
+    String recordText = "";
+
+    for (var song in songsCopy) {
+      if(song.name == songName) {
+
+        if((song.bestScores[player] ?? 0) < score) {
+          song.bestScores[player] = score;
+          setState(() { songs = songsCopy;});
+          appStorage.saveBestScore(player, songName, score);
+          recordText = "Personal Best!";
+        }
+
+        final maxScore = song.bestScores.isEmpty ? 0 : song.bestScores.values.reduce(max);
+        if(maxScore <= score){ recordText = 'NEW RECORD!';}
+
+        break;
+      }
+    }
+    return recordText;
   }
 
   Future<void> _loadGameAndStart(BuildContext context, Song song) async {
@@ -92,8 +102,7 @@ class HomePageState extends State<HomePage> {
 
     AudioPlayer audioPlayer = AudioPlayer();
     audioPlayer.setVolume(0.6);
-    audioPlayer.play(
-        AssetSource('sound-effects/game-start.mp3'));
+    audioPlayer.play(AssetSource('sound-effects/game-start.mp3'));
 
     final gameRequest = GameRequest(
       songTitle: song.name,
@@ -106,7 +115,6 @@ class HomePageState extends State<HomePage> {
         .loadGame(gameRequest)
         .then((response) {
       if (response.status == "waiting") {
-        // loading succeeded, game is waiting for players.
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -114,6 +122,7 @@ class HomePageState extends State<HomePage> {
               numberOfPlayers: numberOfPlayers,
               playerNames: playerNames,
               songName: song.name,
+              updateAndSaveNewScores: updateAndSaveNewScore,
             ),
           ),
         ).then((res) {
@@ -129,62 +138,31 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void _showError(String title, String content) {
+    AlertWidget.showError(
+      context,
+      AlertWidget(
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 40.0),
+        color: Colors.grey.shade800,
+        title: title,
+        content: content,
+        duration: 2,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // The list of songs for the carousel
-    final List<Song> songs = [
-      Song(
-          'Unicorn',
-          'Noa Kirel',
-          {'susan': 342, 'noah': 3491, 'emily': 1904, 'ava': 301},
-          'assets/images/background.png',
-          "unicorn",
-          2),
-      Song(
-          'Flowers',
-          'Miley Cirus',
-          {'caleb': 3412, 'noah': 529, 'susan': 2312},
-          'assets/images/background.png',
-          "flowers",
-          3),
-      Song(
-          'Starships',
-          'Nicky Minaj',
-          {'susan': 4023, 'noah': 3491, 'emily': 523, 'liam': 420, 'ava': 3021},
-          'assets/images/background.png',
-          "starships",
-          4),
-      Song(
-          'Test App',
-          'Just Dance Team',
-          {
-            'susan': 1702,
-            'noah': 2034,
-            'emily': 1573,
-            'liam': 1813,
-            'ava': 3913
-          },
-          'assets/images/background.png',
-          "test_app_dance",
-          1),
-    ];
-
     return Scaffold(
-      key: _homepageKey,
       backgroundColor: Colors.black,
       body: Stack(
         children: [
           Positioned.fill(
             child: Opacity(
               opacity: 0.3,
-              child: Image.asset(
-                'assets/images/background.png',
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset('assets/images/background.png', fit: BoxFit.cover),
             ),
           ),
-
-          // LayoutBuilder to adjust the space for the song list and the menu
           LayoutBuilder(
             builder: (context, constraints) {
               final double screenWidth = constraints.maxWidth;
@@ -193,31 +171,22 @@ class HomePageState extends State<HomePage> {
 
               return Row(
                 children: [
-                  // Left menu (350 pixels wide)
                   SizedBox(
                     width: leftSectionWidth,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const SizedBox(
-                          height: 50,
-                        ),
-                        Image.asset(
-                          'assets/images/jd-logo.png',
-                          width: 150, // Adjust logo size
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
+                        const SizedBox(height: 50),
+                        Image.asset('assets/images/jd-logo.png', width: 150),
+                        const SizedBox(height: 30),
                         SettingWidget(
-                            updatePlayerSelections: updatePlayerSelections,
-                            updateCameraAngle: updateCameraAngle,
+                          updatePlayerSelections: updatePlayerSelections,
+                          updateCameraAngle: updateCameraAngle,
+                          clearAllScores: clearAllScores,
                         ),
                       ],
                     ),
                   ),
-
-                  // Scrollable song list takes up the remaining width
                   SizedBox(
                     width: songListWidth,
                     child: Padding(
@@ -233,8 +202,7 @@ class HomePageState extends State<HomePage> {
                         child: CarouselSlider.builder(
                           carouselController: _carouselController,
                           itemCount: songs.length,
-                          itemBuilder: (BuildContext context, int itemIndex,
-                              int pageViewIndex) {
+                          itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
                             return SongCard(
                               title: songs[itemIndex].title,
                               artist: songs[itemIndex].artist,
@@ -254,8 +222,7 @@ class HomePageState extends State<HomePage> {
                             onPageChanged: (index, reason) {
                               AudioPlayer audioPlayer = AudioPlayer();
                               audioPlayer.setVolume(0.4);
-                              audioPlayer.play(
-                                  AssetSource('sound-effects/whoosh.mp3'));
+                              audioPlayer.play(AssetSource('sound-effects/whoosh.mp3'));
                             },
                             scrollDirection: Axis.vertical,
                           ),
@@ -272,4 +239,3 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
-

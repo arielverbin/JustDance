@@ -82,10 +82,21 @@ class SongCard extends StatelessWidget {
                             ),
                           ),
                           const Spacer(),
-
-                          ..._scoreLine(sortedScores[0].key, sortedScores[0].value, true)
+                          if (bestScores.isEmpty)
+                            Text(
+                              'NO SCORES', // Fallback text
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                            )
+                          else
+                            ..._scoreLine(sortedScores[0].key, sortedScores[0].value, true),
                         ],
                       ),
+
                       Column(children: sortedScores.skip(1).map((entry) {
                         return Row(
                             children: [

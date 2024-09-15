@@ -13,11 +13,14 @@ class InGamePage extends StatefulWidget {
   final int numberOfPlayers;
   final List<String> playerNames;
 
+  final String Function(String, String, int) updateAndSaveNewScores;
+
   const InGamePage({
     super.key,
     required this.songName,
     required this.numberOfPlayers,
     required this.playerNames,
+    required this.updateAndSaveNewScores
   });
 
   @override
@@ -34,6 +37,7 @@ class InGamePageState extends State<InGamePage> {
   final client = ScoringPoseServiceClient(getClientChannel());
   late bool _inGame = true;
   late DateTime startTime;
+
 
   @override
   void initState() {
@@ -109,6 +113,8 @@ class InGamePageState extends State<InGamePage> {
         players: widget.playerNames,
         plotScoresPlayer1: plotScoresPlayer1,
         plotScoresPlayer2: plotScoresPlayer2,
+        songName: widget.songName,
+        updateAndSaveNewScore: widget.updateAndSaveNewScores,
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);

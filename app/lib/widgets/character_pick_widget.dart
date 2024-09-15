@@ -18,9 +18,7 @@ class CharacterPickWidgetState extends State<CharacterPickWidget> {
   late String firstSlotCharacter = "ava";
   late String secondSlotCharacter = "susan";
 
-  final List<String> characters = [
-    'ava', 'caleb', 'emily', 'liam', 'noah', 'susan'
-  ];
+  final List<String> characters = AppStorage().getPlayers();
 
   @override
   void initState() {

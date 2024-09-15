@@ -14,11 +14,14 @@ class GameStartPage extends StatefulWidget {
   final List<String> playerNames;
   final String songName;
 
+  final String Function(String, String, int) updateAndSaveNewScores;
+
   const GameStartPage({
     super.key,
     required this.numberOfPlayers,
     required this.songName,
     required this.playerNames,
+    required this.updateAndSaveNewScores
   });
 
   @override
@@ -110,6 +113,7 @@ class GameStartState extends State<GameStartPage> {
                   songName: widget.songName,
                   numberOfPlayers: widget.numberOfPlayers,
                   playerNames: widget.playerNames,
+                  updateAndSaveNewScores: widget.updateAndSaveNewScores,
                 ),
               ),
             );
