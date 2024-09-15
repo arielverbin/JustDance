@@ -56,11 +56,16 @@ class ScoreWidgetState extends State<ScoreWidget> {
     }
   }
 
-  void updateScore(int newScore, int newTotalScore) {
+  void updateScore(int newScore) {
     setState(() {
       score = newScore;
-      totalScore = newTotalScore;
       feedbackKey = UniqueKey(); // Update with a new UniqueKey
+    });
+  }
+
+  void updateTotalScore(int newTotalScore) {
+    setState(() {
+      totalScore = newTotalScore;
     });
   }
 

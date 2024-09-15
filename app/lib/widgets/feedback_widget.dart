@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class FeedbackWidget extends StatefulWidget {
   final String text;
   final Color color;
+  final int totalDurationMs; // Duration of the animation feedback in milliseconds.
 
-  const FeedbackWidget({super.key, required this.text, required this.color});
+  const FeedbackWidget({
+    super.key,
+    required this.text,
+    required this.color,
+    this.totalDurationMs = 1000,
+  });
 
   @override
   FeedbackWidgetState createState() => FeedbackWidgetState();
@@ -33,8 +39,13 @@ class FeedbackWidgetState extends State<FeedbackWidget>
   }
 
   void _initializeAnimations() {
+    // Convert duration from milliseconds to seconds
+    final durationSeconds = widget.totalDurationMs / 1000.0;
+    const fadeDuration = 0.4; // Duration for fade-in and fade-out in seconds
+    final constantDisplayDuration = durationSeconds - 2 * fadeDuration;
+
     _controller = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: Duration(milliseconds: widget.totalDurationMs),
       vsync: this,
     );
 
@@ -42,27 +53,27 @@ class FeedbackWidgetState extends State<FeedbackWidget>
       TweenSequenceItem(
           tween: Tween(begin: 0.0, end: 1.0)
               .chain(CurveTween(curve: Curves.easeIn)),
-          weight: 4.0),
-      TweenSequenceItem(tween: ConstantTween(1.0), weight: 2.0),
+          weight: fadeDuration),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: constantDisplayDuration),
       TweenSequenceItem(
           tween: Tween(begin: 1.0, end: 0.0)
               .chain(CurveTween(curve: Curves.easeOut)),
-          weight: 4.0),
+          weight: fadeDuration),
     ]).animate(_controller);
 
     _slideAnimation = TweenSequence([
       TweenSequenceItem(
           tween:
-              Tween(begin: const Offset(0.1, 0.0), end: const Offset(0.0, 0.0))
-                  .chain(CurveTween(curve: Curves.easeInOut)),
-          weight: 4.0),
+          Tween(begin: const Offset(0.1, 0.0), end: const Offset(0.0, 0.0))
+              .chain(CurveTween(curve: Curves.easeInOut)),
+          weight: fadeDuration),
       TweenSequenceItem(
-          tween: ConstantTween(const Offset(0.0, 0.0)), weight: 2.0),
+          tween: ConstantTween(const Offset(0.0, 0.0)), weight: constantDisplayDuration),
       TweenSequenceItem(
           tween:
-              Tween(begin: const Offset(0.0, 0.0), end: const Offset(-0.1, 0.0))
-                  .chain(CurveTween(curve: Curves.easeInOut)),
-          weight: 4.0),
+          Tween(begin: const Offset(0.0, 0.0), end: const Offset(-0.1, 0.0))
+              .chain(CurveTween(curve: Curves.easeInOut)),
+          weight: fadeDuration),
     ]).animate(_controller);
 
     _controller.forward();

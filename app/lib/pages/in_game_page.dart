@@ -29,8 +29,8 @@ class InGamePage extends StatefulWidget {
 
 class InGamePageState extends State<InGamePage> {
   late VideoPlayerController _controller;
-  late List<int> scores;
-  late List<int> totalScores;
+  List<int> scores = [0, 0];
+  List<int> totalScores = [0, 0];
   List<FlSpot> plotScoresPlayer1 = [];
   List<FlSpot> plotScoresPlayer2 = [];
   late List<GlobalKey<ScoreWidgetState>> scoreWidgetKeys;
@@ -61,6 +61,7 @@ class InGamePageState extends State<InGamePage> {
 
     // Start the timer to update scores
     _maintainScore();
+    _updateScoreAnimation(updateEvery: 1000);
   }
 
   // Asynchronous function to simulate getting scores for the players
@@ -92,11 +93,28 @@ class InGamePageState extends State<InGamePage> {
             totalScores[i] = newTotalScores[i];
             scoreWidgetKeys[i]
                 .currentState
-                ?.updateScore(scores[i], totalScores[i]);
+                ?.updateTotalScore(totalScores[i]);
           }
         });
       }
     }
+  }
+
+  void _updateScoreAnimation({required int updateEvery}) {
+    Timer.periodic(Duration(milliseconds: updateEvery), (timer) {
+      if(!_inGame) {
+        timer.cancel();
+        return;
+      }
+
+        setState(() {
+          for (int i = 0; i < widget.numberOfPlayers; i++) {
+            scoreWidgetKeys[i]
+                .currentState
+                ?.updateScore(scores[i]);
+          }
+        });
+    });
   }
 
   void _checkVideoEnd() async {
