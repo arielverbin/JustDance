@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class FeedbackWidget extends StatefulWidget {
@@ -12,24 +13,16 @@ class FeedbackWidget extends StatefulWidget {
 
 class FeedbackWidgetState extends State<FeedbackWidget>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _slideAnimation;
+  Timer? _animationTimer;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
-  }
-
-  @override
-  void didUpdateWidget(covariant FeedbackWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text || oldWidget.color != widget.color) {
-      _controller.reset();
-      _controller.forward();
-    }
+    _startTimer(); // Start the timer to run the animation every second
   }
 
   void _initializeAnimations() {
@@ -40,37 +33,47 @@ class FeedbackWidgetState extends State<FeedbackWidget>
 
     _opacityAnimation = TweenSequence([
       TweenSequenceItem(
-          tween: Tween(begin: 0.0, end: 1.0)
-              .chain(CurveTween(curve: Curves.easeIn)),
-          weight: 4.0),
+        tween: Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 4.0,
+      ),
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 2.0),
       TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: 0.0)
-              .chain(CurveTween(curve: Curves.easeOut)),
-          weight: 4.0),
+        tween: Tween(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 4.0,
+      ),
     ]).animate(_controller);
 
     _slideAnimation = TweenSequence([
       TweenSequenceItem(
-          tween:
-              Tween(begin: const Offset(0.1, 0.0), end: const Offset(0.0, 0.0))
-                  .chain(CurveTween(curve: Curves.easeInOut)),
-          weight: 4.0),
+        tween: Tween(begin: const Offset(0.1, 0.0), end: const Offset(0.0, 0.0))
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 4.0,
+      ),
+      TweenSequenceItem(tween: ConstantTween(const Offset(0.0, 0.0)), weight: 2.0),
       TweenSequenceItem(
-          tween: ConstantTween(const Offset(0.0, 0.0)), weight: 2.0),
-      TweenSequenceItem(
-          tween:
-              Tween(begin: const Offset(0.0, 0.0), end: const Offset(-0.1, 0.0))
-                  .chain(CurveTween(curve: Curves.easeInOut)),
-          weight: 4.0),
+        tween: Tween(begin: const Offset(0.0, 0.0), end: const Offset(-0.1, 0.0))
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 4.0,
+      ),
     ]).animate(_controller);
 
     _controller.forward();
   }
 
+  void _startTimer() {
+    _animationTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      // Reset and restart the animation every second
+      if (mounted) {
+        _controller.reset();
+        _controller.forward();
+      }
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _animationTimer?.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }
 
@@ -83,33 +86,19 @@ class FeedbackWidgetState extends State<FeedbackWidget>
         child: Text(
           widget.text,
           style: TextStyle(
-              fontSize: 34.0,
-              color: Colors.white,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w900,
-              fontStyle: FontStyle.italic,
-              shadows: <Shadow>[
-                Shadow(
-                  blurRadius: 30.0,
-                  color: widget.color,
-                  offset: const Offset(0, 0),
-                ),
-                Shadow(
-                  blurRadius: 30.0,
-                  color: widget.color,
-                  offset: const Offset(0, 0),
-                ),
-                Shadow(
-                  blurRadius: 40.0,
-                  color: widget.color,
-                  offset: const Offset(0, 0),
-                ),
-                Shadow(
-                  blurRadius: 40.0,
-                  color: widget.color,
-                  offset: const Offset(0, 0),
-                ),
-              ]),
+            fontSize: 34.0,
+            color: Colors.white,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w900,
+            fontStyle: FontStyle.italic,
+            shadows: <Shadow>[
+              Shadow(
+                blurRadius: 30.0,
+                color: widget.color,
+                offset: const Offset(0, 0),
+              ),
+            ],
+          ),
         ),
       ),
     );
