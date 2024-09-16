@@ -117,6 +117,7 @@ class GameRequest extends $pb.GeneratedMessage {
   factory GameRequest({
     $core.String? songTitle,
     $core.int? numberOfPlayers,
+    $core.double? cameraAngle,
     $core.int? gameSpeed,
   }) {
     final $result = create();
@@ -125,6 +126,9 @@ class GameRequest extends $pb.GeneratedMessage {
     }
     if (numberOfPlayers != null) {
       $result.numberOfPlayers = numberOfPlayers;
+    }
+    if (cameraAngle != null) {
+      $result.cameraAngle = cameraAngle;
     }
     if (gameSpeed != null) {
       $result.gameSpeed = gameSpeed;
@@ -138,7 +142,8 @@ class GameRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'GameRequest', createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'songTitle', protoName: 'songTitle')
     ..a<$core.int>(2, _omitFieldNames ? '' : 'numberOfPlayers', $pb.PbFieldType.O3, protoName: 'numberOfPlayers')
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'gameSpeed', $pb.PbFieldType.O3, protoName: 'gameSpeed')
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'cameraAngle', $pb.PbFieldType.OF, protoName: 'cameraAngle')
+    ..a<$core.int>(4, _omitFieldNames ? '' : 'gameSpeed', $pb.PbFieldType.O3, protoName: 'gameSpeed')
     ..hasRequiredFields = false
   ;
 
@@ -182,13 +187,22 @@ class GameRequest extends $pb.GeneratedMessage {
   void clearNumberOfPlayers() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.int get gameSpeed => $_getIZ(2);
+  $core.double get cameraAngle => $_getN(2);
   @$pb.TagNumber(3)
-  set gameSpeed($core.int v) { $_setSignedInt32(2, v); }
+  set cameraAngle($core.double v) { $_setFloat(2, v); }
   @$pb.TagNumber(3)
-  $core.bool hasGameSpeed() => $_has(2);
+  $core.bool hasCameraAngle() => $_has(2);
   @$pb.TagNumber(3)
-  void clearGameSpeed() => clearField(3);
+  void clearCameraAngle() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get gameSpeed => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set gameSpeed($core.int v) { $_setSignedInt32(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasGameSpeed() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearGameSpeed() => clearField(4);
 }
 
 class GameStatus extends $pb.GeneratedMessage {

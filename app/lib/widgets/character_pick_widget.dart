@@ -131,7 +131,7 @@ class CharacterPickWidgetState extends State<CharacterPickWidget> {
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontFamily: 'Poppins',
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withOpacity(0.7),
               ),
             ),
           )

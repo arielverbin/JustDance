@@ -43,15 +43,16 @@ const GameRequest$json = {
   '2': [
     {'1': 'songTitle', '3': 1, '4': 1, '5': 9, '10': 'songTitle'},
     {'1': 'numberOfPlayers', '3': 2, '4': 1, '5': 5, '10': 'numberOfPlayers'},
-    {'1': 'gameSpeed', '3': 3, '4': 1, '5': 5, '10': 'gameSpeed'},
+    {'1': 'cameraAngle', '3': 3, '4': 1, '5': 2, '10': 'cameraAngle'},
+    {'1': 'gameSpeed', '3': 4, '4': 1, '5': 5, '10': 'gameSpeed'},
   ],
 };
 
 /// Descriptor for `GameRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List gameRequestDescriptor = $convert.base64Decode(
     'CgtHYW1lUmVxdWVzdBIcCglzb25nVGl0bGUYASABKAlSCXNvbmdUaXRsZRIoCg9udW1iZXJPZl'
-    'BsYXllcnMYAiABKAVSD251bWJlck9mUGxheWVycxIcCglnYW1lU3BlZWQYAyABKAVSCWdhbWVT'
-    'cGVlZA==');
+    'BsYXllcnMYAiABKAVSD251bWJlck9mUGxheWVycxIgCgtjYW1lcmFBbmdsZRgDIAEoAlILY2Ft'
+    'ZXJhQW5nbGUSHAoJZ2FtZVNwZWVkGAQgASgFUglnYW1lU3BlZWQ=');
 
 @$core.Deprecated('Use gameStatusDescriptor instead')
 const GameStatus$json = {

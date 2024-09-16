@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'package:app/pages/homepage.dart';
@@ -18,7 +19,7 @@ void main() {
   // initService = initPy(); // Uncomment this line when not debugging
   initService = Future.delayed(const Duration(seconds: 2), () => null);
 
-  runApp(const MainApp());  // Change back to MainApp!
+  runApp(const MainApp()); // Change back to MainApp!
 }
 
 class MainApp extends StatelessWidget {
@@ -39,18 +40,21 @@ class InitPage extends StatefulWidget {
   InitPageState createState() => InitPageState();
 }
 
-class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin {
+class InitPageState extends State<InitPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   var _loadText = "Loading...";
   Future<LoadStatus> _loadStatus = Future(() => LoadStatus());
 
   @override
+
   /// Initializes the animation controllers,
   /// starts the animation and loads the services. *
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 13));
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 13));
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller)
       ..addListener(() {
         setState(() {});
@@ -65,12 +69,15 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
   Future<void> loadService() async {
     try {
       await initService; // wait for server to start.
-      _loadStatus = ScoringPoseServiceClient(getClientChannel()).loadService(EmptyMessage(status: ""));
+      _loadStatus = ScoringPoseServiceClient(getClientChannel())
+          .loadService(EmptyMessage(status: ""));
       if ((await _loadStatus).status == 'success') {
         navigateToHomePageIfReady();
-      } else {log((await _loadStatus).status);}
-
-    } catch (error) { // If initService fails.
+      } else {
+        log((await _loadStatus).status);
+      }
+    } catch (error) {
+      // If initService fails.
       log(error.toString());
     }
   }
@@ -80,17 +87,18 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
     if (_controller.isAnimating) {
       _controller.stop();
     }
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage())
-    );
+    Future.delayed(const Duration(milliseconds: 300), () {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
+    });
   }
 
   /// Animates the loading bar and displays informative load status. *
   Future<void> startAnimation() async {
-
     try {
-      setState(() { _loadText = "Loading..."; });
+      setState(() {
+        _loadText = "Loading...";
+      });
 
       // Start the initial animation and initService concurrently
       await Future.any([
@@ -105,7 +113,14 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
 
       // Ensure initService is complete
       await initService;
-      setState(() { _loadText = "Initializing model..."; });
+
+      AudioPlayer audioPlayer = AudioPlayer();
+      audioPlayer.setVolume(0.6);
+      audioPlayer.play(AssetSource('sound-effects/dance-intro.mp3'));
+
+      setState(() {
+        _loadText = "Initializing model...";
+      });
 
       // Start the final loading animation and _loadStatus check concurrently
       _controller.animateTo(1.0, duration: const Duration(seconds: 3));
@@ -114,13 +129,13 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
         if (loadStatus.status != 'success') {
           setState(() {
             _loadText =
-            "An error occurred while initializing model. Try re-opening the app.";
+                "An error occurred while initializing model. Try re-opening the app.";
           });
-          await _controller.animateTo(
-              0.0, duration: const Duration(seconds: 1));
+          await _controller.animateTo(0.0,
+              duration: const Duration(seconds: 1));
         }
       });
-      
+
       _loadStatus.catchError((error) async {
         setState(() {
           _loadText = "An error occurred. Try re-opening the app.";
@@ -128,7 +143,6 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
         await _controller.animateTo(0.0, duration: const Duration(seconds: 1));
         return LoadStatus(status: "failed");
       });
-
     } catch (error) {
       await _controller.animateTo(0.0, duration: const Duration(seconds: 1));
       setState(() {
@@ -136,8 +150,6 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
       });
     }
   }
-
-
 
   @override
   void dispose() {
@@ -150,13 +162,13 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
     return Scaffold(
       backgroundColor: const Color(0xFF0B1215),
       body: Container(
-        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.1), // 10% of window's width
+        padding: EdgeInsets.all(
+            MediaQuery.of(context).size.width * 0.1), // 10% of window's width
         alignment: Alignment.center,
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               /// Logo. *
               flutter.Image.asset(
                 'assets/images/jd-logo.png',
@@ -171,7 +183,8 @@ class InitPageState extends State<InitPage> with SingleTickerProviderStateMixin 
                   return LinearProgressIndicator(
                     value: _animation.value,
                     backgroundColor: Colors.white12,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.white),
                   );
                 },
               ),
