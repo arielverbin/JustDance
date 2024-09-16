@@ -122,10 +122,14 @@ class KalmanBoxTracker(object):
         self.history = []
         self.hits += 1
         self.hit_streak += 1
-        self.kf.update(convert_bbox_to_z(bbox))
+        # Trust the detections.
+        self.kf.x[:4] = convert_bbox_to_z(bbox)
+        # Also consider the predictions.
+        # self.kf.update(convert_bbox_to_z(bbox))
         self.score = score
 
     def predict(self):
+        print(self.count)
         """
         Advances the state vector and returns the predicted bounding box estimate.
         """
@@ -207,28 +211,23 @@ class Sort(object):
         self.iou_threshold = iou_threshold
         self.trackers = []
         self.frame_count = 0
+        self.protected = []
+        self.recovery_mode = False
 
-    def update(self, dets=np.empty((0, 5)), protect=None):
+    def add_protected(self, protected):
+        self.protected = protected
+
+    def update(self, dets=np.empty((0, 5))):
         """
-        Args:
-            dets: a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
-                Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
-                5)) for frames without detections).
-            protect: a list of ID's that should not be deleted, even if they are not detected.
-                For example, if protect=[player1, player2] and tracker1 (for player1) have no matching detections,
-                return player1's location solely based on the tracker1's prediction.
-
-        Returns:
-            Returns a similar array (like dets), where the last column is the object ID.
-                The returned array MUST include bbox for the protected ID's.
+        Params: dets - a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
+        Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
+        5)) for frames without detections). Returns a similar array, where the last column is the object ID.
 
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
-        if protect is None:
-            protect = []
-
         self.frame_count += 1
         empty_dets = dets.shape[0] == 0
+        print(dets)
 
         # get predicted locations from existing trackers.
         trks = np.zeros((len(self.trackers), 5))
@@ -244,11 +243,18 @@ class Sort(object):
             self.trackers.pop(t)
         matched, unmatched_dets, unmatched_trks = associate_detections_to_trackers(dets, trks, self.iou_threshold)
 
+        if not unmatched_trks:
+            self.recovery_mode = True
+
+        else:
+            self.recovery_mode = False
+
         # update matched trackers with assigned detections
         for m in matched:
             self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1])
 
         # create and initialise new trackers for unmatched detections
+
         for i in unmatched_dets:
             trk = KalmanBoxTracker(dets[i, :], dets[i, -1])
             self.trackers.append(trk)
@@ -258,7 +264,6 @@ class Sort(object):
         for trk in reversed(self.trackers):
             d = trk.get_state()[0]
             if (trk.time_since_update < 1) and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
-                # +1 as MOT benchmark requires positive
                 ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
             i -= 1
             # remove dead tracklet
@@ -268,12 +273,9 @@ class Sort(object):
                 unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
 
         if len(ret):
+            print("ret is: ")
+            print(np.concatenate(ret))
             return np.concatenate(ret)
         elif empty_dets:
             return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
         return np.empty((0, 6))
-
-    def reset(self):
-        self.trackers.clear()
-        KalmanBoxTracker.count = 0  # Reset ID's back to 1.
-        self.frame_count = 0
