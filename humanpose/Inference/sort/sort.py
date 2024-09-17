@@ -273,7 +273,7 @@ class Sort(object):
         print(f"frame count = {self.frame_count}")
 
 
-        if self.frame_count == 300:
+        if self.frame_count == 30:
             self.add_protected(self.trackers)
 
         empty_dets = dets.shape[0] == 0
