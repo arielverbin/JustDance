@@ -270,8 +270,10 @@ class Sort(object):
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
         self.frame_count += 1
+        print(f"frame count = {self.frame_count}")
 
-        if self.frame_count == 100:
+
+        if self.frame_count == 300:
             self.add_protected(self.trackers)
 
         empty_dets = dets.shape[0] == 0
@@ -362,8 +364,11 @@ class Sort(object):
                 for trk in reversed(self.trackers):
                     print(trk.get_state()[0])
 
-                matched = match_dets_trks_with_mse(dets, self.trackers)
-                print(f"matched {str(matched)}")
+                print(f"dets = {dets}")
+                print(" ------------------------------------------------------------------")
+                print(f"self.trackers = {self.trackers}")
+                matched = match_dets_trks_with_mse(dets, trks)
+                print(f"matched = {str(matched)}")
                 for m in matched:
                     print(f"m = {m}")
                     print(f"str m = {str(m)}")
