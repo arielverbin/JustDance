@@ -291,6 +291,7 @@ class Sort(object):
             self.trackers.pop(t)
         matched, unmatched_dets, unmatched_trks = associate_detections_to_trackers(dets, trks, self.iou_threshold)
 
+        # Track all detected objects.
         if not self.protected:
             # update matched trackers with assigned detections
             for m in matched:
@@ -322,6 +323,7 @@ class Sort(object):
                 return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
             return np.empty((0, 6))
 
+        # Track only the players - do not remove and do not add anyone.
         else:
             if not len(unmatched_trks):
                 print(" --------------------------------- IOU good ---------------------------------")
@@ -330,32 +332,16 @@ class Sort(object):
                 for m in matched:
                     self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
 
-                # create and initialise new trackers for unmatched detections
-
-                # for i in unmatched_dets:
-                #     trk = KalmanBoxTracker(dets[i, :], dets[i, -1])
-                #     self.trackers.append(trk)
-
-                # i = len(self.trackers)
-                # unmatched = []
                 for trk in reversed(self.trackers):
                     d = trk.get_state()[0]
-                    # if (trk.time_since_update < 1) and (
                     if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
                         ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
-                    # i -= 1
-                    # # remove dead tracklet
-                    # if trk.time_since_update > self.max_age:
-                    #     self.trackers.pop(i)
-                    # if empty_dets:
-                    #     unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
 
                 if len(ret):
                     print("ret is: ")
                     print(np.concatenate(ret))
                     return np.concatenate(ret)
-                # elif empty_dets:
-                #     return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
+
                 return np.empty((0, 6))
 
             elif len(unmatched_trks) and not self.recovery_mode:
@@ -383,29 +369,16 @@ class Sort(object):
                     print(f"str m = {str(m)}")
                     self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
 
-                # i = len(self.trackers)
-                # unmatched = []
                 for trk in reversed(self.trackers):
                     d = trk.get_state()[0]
-                    j = 1
-                    # if (trk.time_since_update < 1) and (
                     if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
                         ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
-                    # i -= 1
-                    # # remove dead tracklet
-                    # if trk.time_since_update > self.max_age:
-                    #     self.trackers.pop(i)
-                    # if empty_dets:
-                    #     unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
 
                 if len(ret):
                     print("ret is: ")
                     print(np.concatenate(ret))
                     return np.concatenate(ret)
-                # elif empty_dets:
-                #     return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
-                return np.empty((0, 6))
 
-                pass
+                return np.empty((0, 6))
 
         return np.empty((0, 6))
