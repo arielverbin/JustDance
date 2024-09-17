@@ -107,8 +107,8 @@ class KalmanBoxTracker(object):
 
         self.kf.x[:4] = convert_bbox_to_z(bbox)
         self.time_since_update = 0
-        self.id = KalmanBoxTracker.count
         KalmanBoxTracker.count += 1
+        self.id = KalmanBoxTracker.count
         self.history = []
         self.hits = 0
         self.hit_streak = 0
@@ -259,7 +259,7 @@ class Sort(object):
 
     def add_protected(self, protected):
         self.protected = protected
-        self.trackers = protected
+        self.trackers = [trk for trk in self.trackers if trk.id in protected]
 
     def update(self, dets=np.empty((0, 5))):
         """
@@ -272,9 +272,8 @@ class Sort(object):
         self.frame_count += 1
         print(f"frame count = {self.frame_count}")
 
-
         if self.frame_count == 30:
-            self.add_protected(self.trackers)
+            self.add_protected([1])
 
         empty_dets = dets.shape[0] == 0
         print(dets)
