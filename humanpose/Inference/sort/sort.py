@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
+from scipy.optimize import linear_sum_assignment
 
 np.random.seed(0)
 
@@ -205,6 +206,44 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold=0.1):
     return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
 
+def mse_batch(dets, trks):
+    """
+    Returns a matrix of MSE between each det and trk.
+    """
+    # Get only the bounding box coordinates (ignore the scores)
+    dets_bboxes = dets[:, :4]
+    trks_bboxes = trks[:, :4]
+
+    # Expand dims to broadcast and calculate MSE for each pair
+    dets_expanded = np.expand_dims(dets_bboxes, axis=1)  # shape (N, 1, 4)
+    trks_expanded = np.expand_dims(trks_bboxes, axis=0)  # shape (1, M, 4)
+
+    # Calculate MSE between all dets and trks
+    mse_matrix = np.mean((dets_expanded - trks_expanded) ** 2, axis=2)  # shape (N, M)
+
+    return mse_matrix
+
+
+def match_dets_trks_with_mse(dets, trks):
+    """
+    Matches detection bboxes to tracker bboxes using MSE as the cost metric.
+    """
+    if len(dets) == 0 or len(trks) == 0:
+        return []
+
+    # Calculate the MSE cost matrix
+    mse_matrix = mse_batch(dets, trks)
+
+    # Use the linear sum assignment to find the best matches
+    det_indices, trk_indices = linear_sum_assignment(mse_matrix)
+    matches = []
+
+    for det_idx, trk_idx in zip(det_indices, trk_indices):
+        matches.append([det_idx, trk_idx])
+
+    return matches
+
+
 class Sort(object):
     def __init__(self, max_age=1, min_hits=3, iou_threshold=0.1):
         """
@@ -248,17 +287,18 @@ class Sort(object):
         for t in reversed(to_del):
             self.trackers.pop(t)
         matched, unmatched_dets, unmatched_trks = associate_detections_to_trackers(dets, trks, self.iou_threshold)
+
         #
         # if len(unmatched_trks):
         #     self.recovery_mode = True
 
         # else:
         if not len(unmatched_trks):
-            print("here")
+            print(" --------------------------------- IOU good ---------------------------------")
             self.recovery_mode = False
             # update matched trackers with assigned detections
             for m in matched:
-                self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], True)
+                self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
                 # self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
 
             # create and initialise new trackers for unmatched detections
@@ -267,29 +307,31 @@ class Sort(object):
             #     trk = KalmanBoxTracker(dets[i, :], dets[i, -1])
             #     self.trackers.append(trk)
 
-            i = len(self.trackers)
-            unmatched = []
+            # i = len(self.trackers)
+            # unmatched = []
             for trk in reversed(self.trackers):
                 d = trk.get_state()[0]
-                if (trk.time_since_update < 1) and (
-                        trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
+                # if (trk.time_since_update < 1) and (
+                if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
                     ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
-                i -= 1
-                # remove dead tracklet
-                if trk.time_since_update > self.max_age:
-                    self.trackers.pop(i)
-                if empty_dets:
-                    unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                # i -= 1
+                # # remove dead tracklet
+                # if trk.time_since_update > self.max_age:
+                #     self.trackers.pop(i)
+                # if empty_dets:
+                #     unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
 
             if len(ret):
                 print("ret is: ")
                 print(np.concatenate(ret))
                 return np.concatenate(ret)
-            elif empty_dets:
-                return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
+            # elif empty_dets:
+            #     return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
             return np.empty((0, 6))
 
         elif len(unmatched_trks) and not self.recovery_mode:
+            print(" --------------------------------- Predictions ---------------------------------")
+            self.recovery_mode = True
             print("2nd here")
             for trk in reversed(self.trackers):
                 d = trk.get_state()[0]
@@ -300,6 +342,41 @@ class Sort(object):
             return np.concatenate(ret)
 
         elif len(unmatched_trks) and self.recovery_mode:
+            print(" --------------------------------- MSE ---------------------------------")
+            print(dets)
+            for trk in reversed(self.trackers):
+                print(trk.get_state()[0])
+
+            matched = match_dets_trks_with_mse(dets, self.trackers)
+            print(f"matched {str(matched)}")
+            for m in matched:
+                print(f"m = {m}")
+                print(f"str m = {str(m)}")
+                self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
+
+            # i = len(self.trackers)
+            # unmatched = []
+            for trk in reversed(self.trackers):
+                d = trk.get_state()[0]
+                j = 1
+                # if (trk.time_since_update < 1) and (
+                if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
+                    ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                # i -= 1
+                # # remove dead tracklet
+                # if trk.time_since_update > self.max_age:
+                #     self.trackers.pop(i)
+                # if empty_dets:
+                #     unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+
+            if len(ret):
+                print("ret is: ")
+                print(np.concatenate(ret))
+                return np.concatenate(ret)
+            # elif empty_dets:
+            #     return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
+            return np.empty((0, 6))
+
             pass
 
         return np.empty((0, 6))
