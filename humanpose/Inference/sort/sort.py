@@ -386,3 +386,8 @@ class Sort(object):
                 return np.empty((0, 6))
 
         return np.empty((0, 6))
+
+    def reset(self):
+        self.trackers.clear()
+        KalmanBoxTracker.count = 0  # Reset ID's back to 1.
+        self.frame_count = 0
