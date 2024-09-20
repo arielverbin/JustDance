@@ -14,42 +14,66 @@ class WinnerPage extends StatefulWidget {
   final List<FlSpot> plotScoresPlayer1;
   final List<FlSpot> plotScoresPlayer2;
 
+  final String songName;
+  final String Function(String, String, int) updateAndSaveNewScore;
+
   const WinnerPage(
       {super.key,
       required this.players,
       required this.plotScoresPlayer1,
-      required this.plotScoresPlayer2});
+      required this.plotScoresPlayer2,
+      required this.songName,
+      required this.updateAndSaveNewScore});
 
   @override
   WinnerPageState createState() => WinnerPageState();
 }
 
-class WinnerPageState extends State<WinnerPage> {
+class WinnerPageState extends State<WinnerPage> with SingleTickerProviderStateMixin {
   bool _showReturnButton = false;
   bool _showWinnerText = false;
   bool _showWinnerRow = false;
   bool _showSecondRow = false;
   bool _showGraph = false;
+
   String? winnerName;
   int? winner;
   int? winnerScore;
   String? secondPlace;
   int? secondScore;
+
   late Future<void> _winnerFuture;
   final ValueNotifier<int> _scoreNotifier = ValueNotifier<int>(0);
 
   late ConfettiController _confettiController; // Woo ho!
+
+  late AnimationController _newRecordController;
+  late Animation<double> _newRecordAnimation;
+  String recordText = "";
 
   @override
   void initState() {
     super.initState();
     _winnerFuture = _initializeWinnerAndScores();
     _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+
+    _newRecordController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _newRecordAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(
+        parent: _newRecordController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
   void dispose() {
     _confettiController.dispose();
+    _newRecordController.dispose();
     super.dispose();
   }
 
@@ -76,9 +100,18 @@ class WinnerPageState extends State<WinnerPage> {
         secondPlace = "";
         secondScore = 0;
       }
+
+      // Update homepage and save scores to local storage.
+      setState(() {
+        recordText = widget.updateAndSaveNewScore(widget.songName, winnerName!, winnerScore!);
+      });
+      // Will not show 'new record' for the second place.
+      widget.updateAndSaveNewScore(widget.songName, secondPlace!, secondScore!);
+
     } catch (err) {
       print("ERROR: ${err.toString()}");
     }
+
 
     // Start the sequence of animations
     _startAnimationSequence();
@@ -296,38 +329,57 @@ class WinnerPageState extends State<WinnerPage> {
                     ],
                   ),
                   const SizedBox(width: 90),
-                  Stack(children: [
-                    Text(
-                      "   ${winnerScore.toString().padLeft(4, '0')}",
-                      style: const TextStyle(
-                        fontSize: 99,
-                        color: Color.fromRGBO(0, 0, 0, 0),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
+                  Stack(
+                    children: [
+                      Text(
+                        "   ${winnerScore.toString().padLeft(4, '0')}",
+                        style: const TextStyle(
+                          fontSize: 99,
+                          color: Color.fromRGBO(0, 0, 0, 0),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    ValueListenableBuilder<int>(
-                      valueListenable: _scoreNotifier,
-                      builder: (context, score, child) {
-                        return GradientText(
-                          score.toString().padLeft(4, '0'),
-                          style: const TextStyle(
-                            fontSize: 99,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w700,
+                      ValueListenableBuilder<int>(
+                        valueListenable: _scoreNotifier,
+                        builder: (context, score, child) {
+                          return GradientText(
+                            score.toString().padLeft(4, '0'),
+                            style: const TextStyle(
+                              fontSize: 99,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xff6793e1),
+                                Color(0xff7564e1),
+                                Color(0xffC65BCF),
+                                Color(0xffF27BBD),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                        Positioned(
+                          right: 40, // Adjust this value to position the text beyond the right edge
+                          top: 30, // Adjust the vertical positioning as needed
+                          child: ScaleTransition(scale: _newRecordAnimation, child: Transform.rotate(
+                            angle: 0.25,
+                            child: Text(
+                              recordText,
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xff6793e1),
-                              Color(0xff7564e1),
-                              Color(0xffC65BCF),
-                              Color(0xffF27BBD),
-                            ],
-                          ),
-                        );
-                      },
-                    )
-                  ]),
+                        )),
+                    ],
+                  )
+
                 ],
               ),
             ),

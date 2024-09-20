@@ -13,11 +13,14 @@ class InGamePage extends StatefulWidget {
   final int numberOfPlayers;
   final List<String> playerNames;
 
+  final String Function(String, String, int) updateAndSaveNewScores;
+
   const InGamePage({
     super.key,
     required this.songName,
     required this.numberOfPlayers,
     required this.playerNames,
+    required this.updateAndSaveNewScores
   });
 
   @override
@@ -26,14 +29,15 @@ class InGamePage extends StatefulWidget {
 
 class InGamePageState extends State<InGamePage> {
   late VideoPlayerController _controller;
-  late List<int> scores;
-  late List<int> totalScores;
+  List<int> scores = [0, 0];
+  List<int> totalScores = [0, 0];
   List<FlSpot> plotScoresPlayer1 = [];
   List<FlSpot> plotScoresPlayer2 = [];
   late List<GlobalKey<ScoreWidgetState>> scoreWidgetKeys;
   final client = ScoringPoseServiceClient(getClientChannel());
   late bool _inGame = true;
   late DateTime startTime;
+
 
   @override
   void initState() {
@@ -57,6 +61,7 @@ class InGamePageState extends State<InGamePage> {
 
     // Start the timer to update scores
     _maintainScore();
+    _updateScoreAnimation(updateEvery: 1000);
   }
 
   // Asynchronous function to simulate getting scores for the players
@@ -123,6 +128,7 @@ class InGamePageState extends State<InGamePage> {
             // Smoothly update the score without affecting feedback
             scoreWidgetKeys[i]
                 .currentState
+                ?.updateTotalScore(totalScores[i]);
                 ?.updateScore(newScores[i], newTotalScores[i]);
           }
         });
@@ -147,6 +153,23 @@ class InGamePageState extends State<InGamePage> {
     });
   }
 
+  void _updateScoreAnimation({required int updateEvery}) {
+    Timer.periodic(Duration(milliseconds: updateEvery), (timer) {
+      if(!_inGame) {
+        timer.cancel();
+        return;
+      }
+
+        setState(() {
+          for (int i = 0; i < widget.numberOfPlayers; i++) {
+            scoreWidgetKeys[i]
+                .currentState
+                ?.updateScore(scores[i]);
+          }
+        });
+    });
+  }
+
   void _checkVideoEnd() async {
     if (!_controller.value.isPlaying &&
         _controller.value.position == _controller.value.duration) {
@@ -161,6 +184,8 @@ class InGamePageState extends State<InGamePage> {
         players: widget.playerNames,
         plotScoresPlayer1: plotScoresPlayer1,
         plotScoresPlayer2: plotScoresPlayer2,
+        songName: widget.songName,
+        updateAndSaveNewScore: widget.updateAndSaveNewScores,
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);

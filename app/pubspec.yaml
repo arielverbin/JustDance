@@ -18,6 +18,7 @@ dependencies:
   fl_chart: ^0.69.0
   grpc: ^4.0.1
   path: ^1.9.0
+  shared_preferences: ^2.3.2
   path_provider: ^2.1.4
   protobuf: ^3.1.0
   carousel_slider: ^4.2.1

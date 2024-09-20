@@ -74,6 +74,19 @@ class ScoreWidgetState extends State<ScoreWidget> {
     }
   }
 
+  void updateScore(int newScore) {
+    setState(() {
+      score = newScore;
+      feedbackKey = UniqueKey(); // Update with a new UniqueKey
+    });
+  }
+
+  void updateTotalScore(int newTotalScore) {
+    setState(() {
+      totalScore = newTotalScore;
+    });
+  }
+
   Widget getScoreTitle() {
     var nameWidget = Text(
       capitalize(widget.playerName),

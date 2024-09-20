@@ -1,19 +1,23 @@
+import 'package:app/app_storage.dart';
+import 'package:app/pages/winner_page.dart';
 import 'package:app/widgets/character_pick_widget.dart';
+import 'package:app/widgets/clear_storage.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:app/widgets/adjust_angle_page.dart';
 import 'package:app/widgets/about_just_dance.dart';
 import 'camera_widget.dart';
 
 class SettingWidget extends StatefulWidget {
-  final Function(List<String>) updatePlayerSelections; // Add the callback
+  final Function(List<String>) updatePlayerSelections;
   final Function(double) updateCameraAngle;
-  final double cameraAngle;
+  final Function() clearAllScores;
 
   const SettingWidget({
     super.key,
-    required this.updatePlayerSelections, // Initialize in constructor
+    required this.updatePlayerSelections,
     required this.updateCameraAngle,
-    required this.cameraAngle
+    required this.clearAllScores,
   });
 
   @override
@@ -21,19 +25,39 @@ class SettingWidget extends StatefulWidget {
 }
 
 class SettingWidgetState extends State<SettingWidget> {
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-        children: [
-          const Text(
-            'CHARACTERS',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height - 250,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const Text(
+              'CHARACTERS',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
             ),
+            const SizedBox(height: 10),
+            CharacterPickWidget(
+              updatePlayerSelections: widget.updatePlayerSelections,
+            ),
+            const SizedBox(height: 16),
+            const CameraWidget(),
+            const SizedBox(height: 16),
+            AdjustAngleWidget(
+              updateCameraAngle: widget.updateCameraAngle,
+            ),
+            const SizedBox(height: 26),
+            const AboutJustDance(),
+            const SizedBox(height: 26),
+            ClearStorageWidget(clearAllScores: widget.clearAllScores),
+          ],
+        ),
+      ),
           ),
           const SizedBox(height: 10),
           CharacterPickWidget(

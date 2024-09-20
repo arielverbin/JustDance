@@ -25,6 +25,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.game_init_thread = None
         self.game_initializer = None
         self.loaded = False
+        self.score_controller = ScoreController(time_window=2)
         self.song_list = ["test_app_dance"]
 
         self.last_game_scores = None
@@ -79,7 +80,6 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
 
         self.comparator = PoseSequenceScore(target_sequence, "angular", window_duration=3,
                                             weights_config=weights_config)
-        self.score_controller = ScoreController()
 
         self.game_manager.init_camera()
 
@@ -191,6 +191,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
 
         self.game_manager.reset()
         self.model.reset()
+        self.score_controller.reset()
 
     def fetch_scores(self, final=False):
         """
