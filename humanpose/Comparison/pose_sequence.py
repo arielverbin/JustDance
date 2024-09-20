@@ -1,5 +1,5 @@
 import numpy as np
-from Comparasion.pose import Pose
+from Comparison.pose import Pose
 
 
 class PoseSequence:
@@ -15,7 +15,7 @@ class PoseSequence:
         self.preprocessed_poses = None
         self.fps = fps
 
-    def __len__(self):
+    def duration(self) -> float:
         """
         Returns the duration of the sequence in seconds.
 
@@ -72,7 +72,7 @@ class PoseSequence:
                 The pose corresponding to the given time.
         """
 
-        if time < 0 or time >= self.__len__():
+        if time < 0 or time >= self.duration():
             return None
 
         frame_index = int(time * self.fps)
@@ -105,10 +105,10 @@ class PoseSequence:
         half_window_frames = window_frames // 2
         center_frame = int(time * self.fps)
 
-        start_frame = max(center_frame - half_window_frames - 1, 0)
-        end_frame = min(center_frame + half_window_frames, total_frames)
+        start_frame = min(max(center_frame - half_window_frames - 1, 0), total_frames - 1)
+        end_frame = max(min(center_frame + half_window_frames, total_frames), 0)
 
         if start_frame >= end_frame:
-            return PoseSequence([], fps=self.fps)
+            return self.preprocessed_poses[0:1]
 
         return self.preprocessed_poses[start_frame:end_frame]

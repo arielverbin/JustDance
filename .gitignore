@@ -5,4 +5,9 @@ env
 .starterDependenciesInstalled
 vitpose-b-coco.pth
 yolov5su.pt
+yolov8m.pt
 *.mov
+server.bin
+server.dist
+server.build
+server.onefile-build

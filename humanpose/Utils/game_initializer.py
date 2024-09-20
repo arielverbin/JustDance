@@ -1,6 +1,6 @@
-import cv2
 import threading
 import time
+import cv2
 
 
 class GameInitializer:
@@ -18,11 +18,11 @@ class GameInitializer:
         self.should_start = False
         self.game_manager = game_manager
 
-        self.updated_since_last = True
+        self.updated_since_last = False
 
         self.timey = time.time()
 
-        self.players_status = []
+        self.players_status = None
 
     @staticmethod
     def _get_angle_checker(bigger_than, critical_angle):
@@ -42,8 +42,8 @@ class GameInitializer:
         Returns:
 
         """
-        capture = self.game_manager.get_camera_access()
         model = self.game_manager.get_inference_model()
+        capture = self.game_manager.get_camera_access()
 
         confidence_count = 0
         confidence_t = 3
@@ -76,7 +76,7 @@ class GameInitializer:
             # Make sure the first player is the one on the right.
             # Compares the X value of their noses.
             if len(players) > 1:
-                if keypoints[players[0]][0][1] > keypoints[players[1]][0][1]:
+                if keypoints[players[0]][0][1] < keypoints[players[1]][0][1]:
                     print(f"[LOG] SWITCHED PLACES, players: {players}: first one: {keypoints[players[0]][0][1]:.4f}"
                           f" and second {keypoints[players[1]][0][1]:.4f}.")
                     players.reverse()
@@ -141,7 +141,7 @@ class GameInitializer:
         """
         print(f"[LOG] Fetching... [{time.time() - self.timey:.4f}s]")
         with self.condition:
-            while (not self.should_start) and (not self.updated_since_last):
+            while (not self.should_start and not self.updated_since_last) or (self.players_status is None):
                 self.condition.wait()
 
             print(f"[LOG] Fetched new status: {self.players_status}. [{time.time() - self.timey:.4f}s]")

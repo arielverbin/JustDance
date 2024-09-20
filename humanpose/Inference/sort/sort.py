@@ -93,10 +93,18 @@ class KalmanBoxTracker(object):
         """
         # define constant velocity model
         self.kf = KalmanFilter(dim_x=7, dim_z=4)
-        self.kf.F = np.array([[1, 0, 0, 0, 1, 0, 0], [0, 1, 0, 0, 0, 1, 0], [0, 0, 1, 0, 0, 0, 1], [
-            0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0, 1]])
+        self.kf.F = np.array([[1, 0, 0, 0, 1, 0, 0],
+                              [0, 1, 0, 0, 0, 1, 0],
+                              [0, 0, 1, 0, 0, 0, 1],
+                              [0, 0, 0, 1, 0, 0, 0],
+                              [0, 0, 0, 0, 1, 0, 0],
+                              [0, 0, 0, 0, 0, 1, 0],
+                              [0, 0, 0, 0, 0, 0, 1]])
         self.kf.H = np.array(
-            [[1, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0]])
+            [[1, 0, 0, 0, 0, 0, 0],
+             [0, 1, 0, 0, 0, 0, 0],
+             [0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 1, 0, 0, 0]])
 
         self.kf.R[2:, 2:] *= 10.
         self.kf.P[4:, 4:] *= 1000.  # give high uncertainty to the unobservable initial velocities
@@ -119,7 +127,6 @@ class KalmanBoxTracker(object):
         """
         Updates the state vector with observed bbox.
         """
-        print("what is this?!")
         self.time_since_update = 0
         self.history = []
         self.hits += 1
@@ -133,7 +140,6 @@ class KalmanBoxTracker(object):
         self.score = score
 
     def predict(self):
-        print(self.count)
         """
         Advances the state vector and returns the predicted bounding box estimate.
         """
@@ -258,6 +264,8 @@ class Sort(object):
 
     def add_protected(self, protected):
         self.protected = protected
+        print(f"[LOG] Added protected: {protected}.")
+
         self.trackers = [trk for trk in self.trackers if trk.id in protected]
 
     def update(self, dets=np.empty((0, 5))):
@@ -269,13 +277,8 @@ class Sort(object):
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
         self.frame_count += 1
-        print(f"frame count = {self.frame_count}")
-
-        if self.frame_count == 30:
-            self.add_protected([1])
 
         empty_dets = dets.shape[0] == 0
-        print(dets)
 
         # get predicted locations from existing trackers.
         trks = np.zeros((len(self.trackers), 5))
@@ -309,13 +312,13 @@ class Sort(object):
                 if (trk.time_since_update < 1) and (
                         trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
                     # +1 as MOT benchmark requires positive
-                    ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                    ret.append(np.concatenate((d, [trk.score, trk.id])).reshape(1, -1))
                 i -= 1
                 # remove dead tracklet
                 if trk.time_since_update > self.max_age:
                     self.trackers.pop(i)
                 if empty_dets:
-                    unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                    unmatched.append(np.concatenate((d, [trk.score, trk.id])).reshape(1, -1))
 
             if len(ret):
                 return np.concatenate(ret)
@@ -326,7 +329,6 @@ class Sort(object):
         # Track only the players - do not remove and do not add anyone.
         else:
             if not len(unmatched_trks):
-                print(" --------------------------------- IOU good ---------------------------------")
                 self.recovery_mode = False
                 # update matched trackers with assigned detections
                 for m in matched:
@@ -335,51 +337,34 @@ class Sort(object):
                 for trk in reversed(self.trackers):
                     d = trk.get_state()[0]
                     if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
-                        ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                        ret.append(np.concatenate((d, [trk.score, trk.id])).reshape(1, -1))
 
                 if len(ret):
-                    print("ret is: ")
-                    print(np.concatenate(ret))
                     return np.concatenate(ret)
 
                 return np.empty((0, 6))
 
             elif len(unmatched_trks) and not self.recovery_mode:
-                print(" --------------------------------- Predictions ---------------------------------")
                 self.recovery_mode = True
-                print("2nd here")
                 for trk in reversed(self.trackers):
                     d = trk.get_state()[0]
-                    ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                    ret.append(np.concatenate((d, [trk.score, trk.id])).reshape(1, -1))
 
-                print("ret is: ")
-                print(np.concatenate(ret))
                 return np.concatenate(ret)
 
             elif len(unmatched_trks) and self.recovery_mode:
-                print(" --------------------------------- MSE ---------------------------------")
-                print(dets)
-                for trk in reversed(self.trackers):
-                    print(trk.get_state()[0])
 
-                print(f"dets = {dets}")
-                print(" ------------------------------------------------------------------")
-                print(f"self.trackers = {self.trackers}")
                 matched = match_dets_trks_with_mse(dets, trks)
-                print(f"matched = {str(matched)}")
+
                 for m in matched:
-                    print(f"m = {m}")
-                    print(f"str m = {str(m)}")
                     self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
 
                 for trk in reversed(self.trackers):
                     d = trk.get_state()[0]
                     if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
-                        ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                        ret.append(np.concatenate((d, [trk.score, trk.id])).reshape(1, -1))
 
                 if len(ret):
-                    print("ret is: ")
-                    print(np.concatenate(ret))
                     return np.concatenate(ret)
 
                 return np.empty((0, 6))
@@ -389,4 +374,6 @@ class Sort(object):
     def reset(self):
         self.trackers.clear()
         KalmanBoxTracker.count = 0  # Reset ID's back to 1.
+        self.protected = []
         self.frame_count = 0
+        self.recovery_mode = False

@@ -7,4 +7,3 @@ numpy~=1.26.4
 filterpy~=1.4.5
 matplotlib~=3.9.0
 moviepy~=1.0.3
-scipy~=1.11.4

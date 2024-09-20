@@ -1,11 +1,12 @@
 class ScoreController:
 
-    def __init__(self, time_window):
+    def __init__(self, time_window, dance_duration):
         self.players = {}
         self.time_window = time_window  # Keep scores within the last {time_window} seconds
 
-    def reset(self):
-        self.players = {}
+        max_score = 100
+        max_total_score = 10000
+        self.range_factor = max_total_score / (dance_duration * max_score)
 
     def process_score(self, player_id, score, time):
         """
@@ -35,7 +36,7 @@ class ScoreController:
         # Add the new score with its time
         self._push_new_score(player_id, score, time)
 
-        return int(stabilized_score), int(self.players[player_id]['total_score'])
+        return int(stabilized_score), (int(self.players[player_id]['total_score'] * self.range_factor))
 
     def _push_new_score(self, player_id, score, time):
         scores = self.players[player_id]['scores']

@@ -1,6 +1,6 @@
 import cv2
 import time
-from Comparasion.pose import Pose
+from Comparison.pose import Pose
 
 
 def track_players(game_manager):
@@ -10,26 +10,32 @@ def track_players(game_manager):
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference_model()
-    players = None
     capture = game_manager.get_camera_access()
+    players = None
+
     # TODO: this thread is active on gameStart. change it so THIS thread will do the tracking
     while True:
         ret, img = capture.read()
 
+        # Waits for game to start.
         game_manager.wait_for_game_start()
+
         if game_manager.should_terminate():
             break
 
         if players is None:
             players = game_manager.get_players()
+            print(f"[LOG] Player1 is with ID: {players[0]},"
+                  f"Player2 is with ID: {players[1] if len(players) > 1 else None}")
+
+            model.add_protected(players)
 
         if not ret:
             print("Error: Could not read frame from camera.")
             break
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.flip(img, 1)
 
-        model.update_tracker(img, protect=players)
+        model.update_tracker(img)
 
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
@@ -46,6 +52,7 @@ def score_dance(comparator, score_controller, game_manager):
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference_model()
+    game_speed = game_manager.game_speed
 
     players = None
     start_time = None
@@ -67,16 +74,15 @@ def score_dance(comparator, score_controller, game_manager):
         if start_time is None:
             start_time = time.time()
 
-        current_time = time.time() - start_time
+        current_time = (time.time() - start_time) / game_speed
 
         scores = {}
         # print(f"DETECTED PLAYERS: {keypoints.keys()}, PLAYERS: {players}")
         # print(f"KEYPOINTS: {keypoints}\n\n\n")
         if keypoints:
             for player_id, current_pose in keypoints.items():
-                print(f"Person {player_id} detected.")
+                print(f"[LOG] Person {player_id} detected.")
                 if player_id in players:
-                    print(f"Nose X,Y for player ID{player_id}: ({current_pose[0][1]:.4f}, {current_pose[0][0]}:.4f)")
                     # Calculate comparison value.
                     comparison = comparator.compare(pose=Pose(current_pose), time=current_time, preprocessed=False)
                     # Convert comparison value to score.
@@ -93,4 +99,3 @@ def score_dance(comparator, score_controller, game_manager):
 
         # print(f"final scores: {scores}")
         game_manager.update_score(scores)
-

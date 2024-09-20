@@ -1,5 +1,5 @@
 import numpy as np
-from Comparasion.pose_score import PoseScore
+from Comparison.pose_score import PoseScore
 
 
 class CosineScore(PoseScore):

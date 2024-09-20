@@ -1,11 +1,10 @@
 import numpy as np
-from Comparasion.utils import calc_angle, weighted_avg
-from Comparasion.pose_score import PoseScore
-
+from Comparison.utils import calc_angle, weighted_avg
+from Comparison.pose_score import PoseScore
 
 joints = [
-    [16, 14, 12, 0.2],  # Knee 1
-    [15, 13, 11, 0.2],  # Knee 2
+    [16, 14, 12, 0.7],  # Knee 1
+    [15, 13, 11, 0.7],  # Knee 2
     [14, 12, 11, 0.7],  # Lower Hip 1
     [13, 11, 12, 0.7],  # Lower Hip 2
     [6, 12, 14, 0.5],  # Outer Hip 1
@@ -60,6 +59,7 @@ class AngularScore(PoseScore):
 
         v2 = pose.get_coordinates()
         scores = []
+
         joint_count = 0
         for joint in joints:
             angle1 = preprocessed_target[joint_count]
@@ -68,7 +68,9 @@ class AngularScore(PoseScore):
             angle2 = calc_angle((v2[joint[0]], v2[joint[1]]),
                                 (v2[joint[1]], v2[joint[2]]))
 
-            scores.append(abs(angle1 - angle2) ** self.factor)
+            angle_diff = abs(angle1 - angle2)
+
+            scores.append(angle_diff ** self.factor)
 
         # TODO: use weighted mean instead of normal mean
         #  (according to probabilities - after softmax - and importance of each joint).
@@ -83,10 +85,14 @@ class AngularScore(PoseScore):
                 (float): the comparison result (where 0 is best).
         """
         scores = []
+
         for i in range(len(joints)):
             angle1 = preprocessed_target[i]
             angle2 = preprocessed_pose[i]
-            scores.append(abs(angle1 - angle2) ** self.factor)
+
+            angle_diff = abs(angle1 - angle2)
+
+            scores.append(angle_diff ** self.factor)
 
         # TODO: use weighted mean instead of normal mean
         #  (according to probabilities - after softmax - and importance of each joint).

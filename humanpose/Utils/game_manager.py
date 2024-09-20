@@ -21,6 +21,8 @@ class GameManager:
         self.last_score = None  # Resets to None whenever it is accessed (to prevent accessing the same score twice)
         self.final_score = None  # Does not reset to None (fetch last score).
 
+        self.game_speed = 1
+
         self.capture = None
         self.model = inference_model
         self.num_players = None

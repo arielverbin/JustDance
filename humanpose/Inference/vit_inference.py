@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 import typing
 import threading
@@ -14,7 +15,6 @@ from Inference.model.model import ViTPose
 from Inference.utils.util import pad_image
 from Inference.model.postprocess import keypoints_from_heatmaps
 from Inference.utils.util import dyn_model_import
-
 
 try:  # Add bools -> error stack
     import pycuda.driver as cuda  # noqa: F401
@@ -64,8 +64,10 @@ class VitInference:
             self.device = 'mps'
 
         self.yolo = YOLO(yolo_path, task='detect')
+
         self.yolo_size = yolo_size
         self.yolo_step = 1  # YOLO (and not tracker) will be used to predict every frame. TODO: check step > 1.
+
         self.tracker = None
         self.frame_counter = 0
         self.initialize_tracker()
@@ -122,16 +124,26 @@ class VitInference:
                             min_hits=min_hits,
                             iou_threshold=0.3)
 
-    def update_tracker(self, img: np.ndarray, protect):
+    def add_protected(self, protected):
+        """
+        Adds protected person detections (the players). To avoid the disposal of their tracker.
+        Args:
+          protected: (list of ints) player ID's that should not be deleted, even if their detection is missing.
+
+        """
+        if self.tracker is not None:
+            self.tracker.add_protected(protected=protected)
+
+    def update_tracker(self, img: np.ndarray):
         """
         Updates the person tracker with the next frame.
         Args:
             img: the next frame.
-            protect: (list of ints) player ID's that should not be deleted, even if their detection is missing.
 
         Returns:
             the predicted bboxes for each person with a tracker.
         """
+        start_time = time.time()
         # Use YOLOv8 for detection
         res_pd = np.empty((0, 5))
         if (self.tracker is None or
@@ -143,7 +155,7 @@ class VitInference:
                                results.boxes.data.cpu().numpy() if r[4] > 0.35]).reshape((-1, 5))
         self.frame_counter += 1
 
-        res_pd = self.tracker.update(res_pd, protect=protect)
+        res_pd = self.tracker.update(res_pd)
 
         bboxes = res_pd[:, :4].round().astype(int)
         scores = res_pd[:, 4].tolist()
@@ -168,7 +180,7 @@ class VitInference:
         """
         if img is not None:
             # Tracker is not used in a different thread, perform tracking here.
-            self.update_tracker(img, protect=[])
+            self.update_tracker(img)
 
         frame_keypoints = {}
 
@@ -188,7 +200,7 @@ class VitInference:
         if ids is None:
             ids = range(len(bboxes))
 
-        for bbox, id in zip(bboxes, ids):
+        for bbox, idx in zip(bboxes, ids):
             bbox[[0, 2]] = np.clip(bbox[[0, 2]] + [-pad_bbox, pad_bbox], 0, img.shape[1])
             bbox[[1, 3]] = np.clip(bbox[[1, 3]] + [-pad_bbox, pad_bbox], 0, img.shape[0])
 
@@ -200,7 +212,7 @@ class VitInference:
 
             # Transform keypoints to original image
             keypoints[:, :2] += bbox[:2][::-1] - [top_pad, left_pad]
-            frame_keypoints[id] = keypoints
+            frame_keypoints[idx] = keypoints
 
         # Save state
         self._img = img

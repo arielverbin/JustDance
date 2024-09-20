@@ -1,9 +1,9 @@
 import warnings
 
 import numpy as np
-from Comparasion.pose_sequence import PoseSequence
-from Comparasion.angular_score import AngularScore
-from Comparasion.cosine_pose import CosineScore
+from Comparison.pose_sequence import PoseSequence
+from Comparison.angular_score import AngularScore
+from Comparison.cosine_pose import CosineScore
 
 
 class PoseSequenceScore:
@@ -87,6 +87,11 @@ class PoseSequenceScore:
         """
         return self.score_method.convert_to_score(value)
 
+    def get_weights_for_size(self, size):
+        start_index = max((len(self.weights) - size) // 2, 0)
+        end_index = max((len(self.weights) + size) // 2, len(self.weights))
+        return self.weights[start_index:end_index]
+
     def compare(self, pose, time, preprocessed=False):
         """
         Calculating the weight between the given pose and poses around the given time.
@@ -111,7 +116,7 @@ class PoseSequenceScore:
         preprocessed_pose = pose if preprocessed else self.score_method.process_target(pose)
 
         best = 100
-        for target, weight in zip(window, self.weights):
+        for target, weight in zip(window, self.get_weights_for_size(len(window))):
             current_score = self.score_method.compare_preprocessed(target, preprocessed_pose) + weight
             if current_score < best:
                 best = current_score

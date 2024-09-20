@@ -29,7 +29,7 @@ class GameStartPage extends StatefulWidget {
 }
 
 class GameStartState extends State<GameStartPage> {
-  late int playersLeft = 2;
+  late int playersLeft = 3;
   bool _isPolling = true;
   bool canceling = false;
   late List<String> tips = [
@@ -46,7 +46,7 @@ class GameStartState extends State<GameStartPage> {
   @override
   void initState() {
     super.initState();
-    playersLeft = widget.numberOfPlayers;
+    playersLeft = 3;
     tips.shuffle(Random());
 
     _waitForGameStart();
@@ -82,6 +82,7 @@ class GameStartState extends State<GameStartPage> {
     while (_isPolling) {
       try {
         final response = await client.startGame(EmptyMessage(status: ""));
+
         if (mounted) {
 
           int newPlayersLeft =  widget.numberOfPlayers - response.numberOfPlayers;
@@ -184,27 +185,37 @@ class GameStartState extends State<GameStartPage> {
                       fontFamily: 'Poppins',
                     ),
                   ),
-                  GradientText(
-                    playersLeft == 0
-                        ? "STARTING..."
-                        : (playersLeft == 1
-                            ? "1 MORE PLAYER"
-                            : (playersLeft < 0 ? "TOO MANY PLAYERS" : "$playersLeft MORE PLAYERS")),
-                    style: const TextStyle(
+                  playersLeft < 3 ? (
+                    GradientText(
+                      playersLeft == 0
+                          ? "STARTING..."
+                          : (playersLeft == 1
+                          ? "1 MORE PLAYER"
+                          : (playersLeft < 0
+                          ? "TOO MANY PLAYERS"
+                          : "$playersLeft MORE PLAYERS")),
+                      style: const TextStyle(
+                        fontSize: 50.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Poppins',
+                      ),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xff6793e1),
+                          Color(0xff7564e1),
+                          Color(0xffC65BCF),
+                          Color(0xffF27BBD),
+                        ],
+                      ),
+                    )
+                  ) : (
+                    const Text("HOLD ON...", style: TextStyle(
                       fontSize: 50.0,
-                      color: Colors.white,
+                      color: Colors.white24,
                       fontWeight: FontWeight.w700,
                       fontFamily: 'Poppins',
-                    ),
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xff6793e1),
-                        Color(0xff7564e1),
-                        Color(0xffC65BCF),
-                        Color(0xffF27BBD),
-                      ],
-                    ),
-                  ),
+                    ),) ),
                   Text(
                     playersLeft == 1
                         ? " is raising their hands."

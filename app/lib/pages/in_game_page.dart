@@ -73,92 +73,44 @@ class InGamePageState extends State<InGamePage> {
     );
   }
 
-  // // Function to maintain the scores, updating them in a loop
-  // // Function to maintain the scores, updating them in a loop every 500ms
-  // void _maintainScore() {
-  //   Timer.periodic(const Duration(seconds: 1), (timer) async {
-  //     if (!_inGame) {
-  //       timer.cancel(); // Stop the timer if the game is no longer running
-  //       return;
-  //     }
-  //
-  //     double timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
-  //
-  //     var (newScores, newTotalScores) = await _getScore(); // Get new scores
-  //     plotScoresPlayer1.add(FlSpot(timePassed, newScores[0].toDouble()));
-  //     plotScoresPlayer2.add(FlSpot(timePassed, newScores[1].toDouble()));
-  //
-  //     // Check if the widget is mounted before calling setState
-  //     if (mounted && _inGame) {
-  //       setState(() {
-  //         for (int i = 0; i < widget.numberOfPlayers; i++) {
-  //           // Update the score widget with the new scores
-  //           scoreWidgetKeys[i]
-  //               .currentState
-  //               ?.updateScore(newScores[i], newTotalScores[i]);
-  //         }
-  //       });
-  //     }
-  //   });
-  // }
+  // Function to maintain the scores, updating them in a loop
+  void _maintainScore() async {
+    double timePassed;
 
-  void _maintainScore() {
-    // High-frequency timer for smooth score updates (e.g., 60 frames per second)
-    Timer.periodic(const Duration(milliseconds: 16), (timer) async {
-      if (!_inGame) {
-        timer.cancel(); // Stop the timer if the game is no longer running
-        return;
-      }
+    while (_inGame) {
+      // Check if the widget is mounted before running the loop
+      var (newScores, newTotalScores) = await _getScore(); // Get new scores
 
-      double timePassed =
-          DateTime.now().difference(startTime).inSeconds.toDouble();
-      var (newScores, newTotalScores) = (scores, totalScores);
-      try {
-        (newScores, newTotalScores) = await _getScore(); // Fetch new scores
-      } catch (e) {
-        return;
-      }
+      timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
 
-      plotScoresPlayer1.add(FlSpot(timePassed, newScores[0].toDouble()));
-      plotScoresPlayer2.add(FlSpot(timePassed, newScores[1].toDouble()));
-
-      if (mounted && _inGame) {
+      if (_inGame) {
+        // Check if the widget is mounted before calling setState
         setState(() {
           for (int i = 0; i < widget.numberOfPlayers; i++) {
-            // Smoothly update the score without affecting feedback
+            scores[i] = newScores[i];
+            totalScores[i] = newTotalScores[i];
             scoreWidgetKeys[i]
                 .currentState
                 ?.updateTotalScore(totalScores[i]);
-                ?.updateScore(newScores[i], newTotalScores[i]);
           }
         });
       }
-    });
-
-    // Separate timer for feedback updates (once per second)
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (!_inGame) {
-        timer.cancel(); // Stop the timer if the game is no longer running
-        return;
-      }
-
-      // Trigger feedback updates (handled in ScoreWidget)
-      if (mounted && _inGame) {
-        setState(() {
-          for (int i = 0; i < widget.numberOfPlayers; i++) {
-            scoreWidgetKeys[i].currentState?.triggerFeedback();
-          }
-        });
-      }
-    });
+    }
   }
 
   void _updateScoreAnimation({required int updateEvery}) {
+    double timePassed;
+
     Timer.periodic(Duration(milliseconds: updateEvery), (timer) {
       if(!_inGame) {
         timer.cancel();
         return;
       }
+
+      timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
+
+      plotScoresPlayer1.add(FlSpot(timePassed, scores[0].toDouble()));
+      plotScoresPlayer2.add(FlSpot(timePassed, scores[1].toDouble()));
 
         setState(() {
           for (int i = 0; i < widget.numberOfPlayers; i++) {
