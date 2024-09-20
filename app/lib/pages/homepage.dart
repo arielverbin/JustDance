@@ -35,9 +35,11 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<HomePageState> _homepageKey = GlobalKey();
   late CarouselController _carouselController;
   late bool gameStarted = false;
+  late double cameraAngle = 0.5;
 
   late int numberOfPlayers;
   List<String> playerNames = ['ava'];
+
 
   @override
   void initState() {
@@ -50,6 +52,12 @@ class HomePageState extends State<HomePage> {
     setState(() {
       playerNames = selectedPlayers;
       numberOfPlayers = selectedPlayers.length;
+    });
+  }
+
+  void updateCameraAngle(double newAngle) {
+    setState(() {
+      cameraAngle = newAngle;
     });
   }
 
@@ -83,9 +91,16 @@ class HomePageState extends State<HomePage> {
     setState(() {
       gameStarted = true;
     });
+
+    AudioPlayer audioPlayer = AudioPlayer();
+    audioPlayer.setVolume(0.6);
+    audioPlayer.play(
+        AssetSource('sound-effects/game-start.mp3'));
+
     final gameRequest = GameRequest(
       songTitle: song.name,
       numberOfPlayers: numberOfPlayers,
+      cameraAngle: cameraAngle,
       gameSpeed: 1,
     );
 
@@ -197,7 +212,10 @@ class HomePageState extends State<HomePage> {
                           height: 30,
                         ),
                         SettingWidget(
-                            updatePlayerSelections: updatePlayerSelections),
+                            updatePlayerSelections: updatePlayerSelections,
+                            updateCameraAngle: updateCameraAngle,
+                            cameraAngle: cameraAngle,
+                        ),
                       ],
                     ),
                   ),
@@ -257,3 +275,4 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
+

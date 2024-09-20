@@ -16,6 +16,17 @@ class CosineScore(PoseScore):
 
         return cos_sim
 
+    def compare_preprocessed(self, preprocessed_target, preprocessed_pose):
+        """
+            Compares the two preprocessed poses using the cosine similarity method.
+            Returns:
+                (float): the comparison result between -1 and 1 (where 0 is best).
+        """
+        cos_sim = np.dot(preprocessed_target, preprocessed_pose) / \
+                  (np.linalg.norm(preprocessed_target) * np.linalg.norm(preprocessed_pose))
+
+        return cos_sim
+
     def convert_to_score(self, value):
         score = (value ** 2) * 100  # Transform the score to [0,100]
         return 100 - score

@@ -1,6 +1,6 @@
 import time
 
-from Utils.load_utils import load_from
+from Utils.load_utils import load_from, load_song
 from Utils.game_manager import GameManager
 from Utils.game_utils import track_players, score_dance
 from Utils.game_initializer import GameInitializer
@@ -71,7 +71,8 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         if song_title not in self.song_list:
             return service_pb2.GameStatus(numberOfPlayers=0, status="not found")
 
-        pose_sequence = load_from(f"./Songs/{song_title}.pkl")
+        pose_sequence = load_song(song_title, request.cameraAngle)
+        print("done with this")
 
         target_sequence = PoseSequence(pose_sequence, fps=10)
         weights_config = {"dont_punish": 2, "shift": 0.3, "punish_factor": 100}

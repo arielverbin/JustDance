@@ -99,18 +99,19 @@ class CameraPageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0B1215),
       body: Stack(
         children: [
           // Background with opacity
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.3,
-              child: Image.asset(
-                'assets/images/background.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          // Positioned.fill(
+          //   child: Opacity(
+          //     opacity: 0.3,
+          //     child: Image.asset(
+          //       'assets/images/background.png',
+          //       fit: BoxFit.cover,
+          //     ),
+          //   ),
+          // ),
           // Camera preview with padding and rounded corners
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 80),
@@ -211,7 +212,7 @@ class CameraPageState extends State<CameraPage> {
           ),
         ],
       ),
-      backgroundColor: Colors.black,
+
     );
   }
 }
@@ -242,14 +243,14 @@ class CameraWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.camera_alt_rounded,
-                color: Colors.white.withOpacity(0.5)),
+                color: Colors.white.withOpacity(0.7)),
             const SizedBox(width: 8),
             Text(
               'Camera Preview',
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontFamily: 'Poppins',
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withOpacity(0.7),
               ),
             ),
           ],

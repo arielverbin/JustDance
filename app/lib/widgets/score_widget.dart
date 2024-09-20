@@ -25,20 +25,38 @@ class ScoreWidget extends StatefulWidget {
 class ScoreWidgetState extends State<ScoreWidget> {
   late int score;
   late int totalScore;
-  late Key feedbackKey; // Add a Key for the feedback widget
+  late String feedbackText;
+  late Color feedbackColor;
 
   @override
   void initState() {
     super.initState();
     score = widget.initialScore;
     totalScore = widget.initialTotalScore;
-    feedbackKey = UniqueKey(); // Initialize with UniqueKey
+    var (initialFeedback, initialColor) = scoreToFeedback(score);
+    feedbackText = initialFeedback;
+    feedbackColor = initialColor;
+  }
+
+  /// Updates the score smoothly (called frequently)
+  void updateScore(int newScore, int newTotalScore) {
+    setState(() {
+      score = newScore;
+      totalScore = newTotalScore;
+    });
+  }
+
+  /// Triggers the feedback update (called once per second)
+  void triggerFeedback() {
+    setState(() {
+      var (feedback, color) = scoreToFeedback(score);
+      feedbackText = feedback;
+      feedbackColor = color;
+    });
   }
 
   String capitalize(String input) {
-    if (input.isEmpty) {
-      return input;
-    }
+    if (input.isEmpty) return input;
     return input[0].toUpperCase() + input.substring(1).toLowerCase();
   }
 
@@ -56,16 +74,7 @@ class ScoreWidgetState extends State<ScoreWidget> {
     }
   }
 
-  void updateScore(int newScore, int newTotalScore) {
-    setState(() {
-      score = newScore;
-      totalScore = newTotalScore;
-      feedbackKey = UniqueKey(); // Update with a new UniqueKey
-    });
-  }
-
   Widget getScoreTitle() {
-
     var nameWidget = Text(
       capitalize(widget.playerName),
       style: const TextStyle(
@@ -77,19 +86,19 @@ class ScoreWidgetState extends State<ScoreWidget> {
     );
 
     var scoreWidget = Opacity(
-      opacity: 0.5, // Adjust opacity as needed
+      opacity: 0.5,
       child: Text(
         '$totalScore',
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 20.0, // Adjust the font size for the total score
+          fontSize: 20.0,
           fontFamily: 'Poppins',
-          fontWeight: FontWeight.w500, // Not bold
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
 
-    if(widget.playerIndex == -1) {
+    if (widget.playerIndex == -1) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [scoreWidget, const SizedBox(width: 10), nameWidget],
@@ -103,7 +112,6 @@ class ScoreWidgetState extends State<ScoreWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var (feedback, color) = scoreToFeedback(score);
     var scoreTitleWidget = getScoreTitle();
 
     List<Widget> rowChildren = [
@@ -121,11 +129,9 @@ class ScoreWidgetState extends State<ScoreWidget> {
             : CrossAxisAlignment.end,
         children: <Widget>[
           scoreTitleWidget,
-          // Use the feedbackKey here
           FeedbackWidget(
-            key: feedbackKey,
-            text: feedback,
-            color: color,
+            text: feedbackText,
+            color: feedbackColor,
           ),
         ],
       ),

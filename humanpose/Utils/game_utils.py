@@ -78,7 +78,7 @@ def score_dance(comparator, score_controller, game_manager):
                 if player_id in players:
                     print(f"Nose X,Y for player ID{player_id}: ({current_pose[0][1]:.4f}, {current_pose[0][0]}:.4f)")
                     # Calculate comparison value.
-                    comparison, _ = comparator.compare(pose=Pose(current_pose), time=current_time)
+                    comparison = comparator.compare(pose=Pose(current_pose), time=current_time, preprocessed=False)
                     # Convert comparison value to score.
                     score = comparator.convert_to_score(comparison)
                     # Stabilize score and calculate total player's score.
