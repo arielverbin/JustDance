@@ -15,3 +15,12 @@ This project involves two main components:
 4. **Camera Angle Independece**: The player can specify the angle at which their camera is positioned. The algorithm then knows to compare their dance movements to the dancer's pose sequence that was filmed from the most similar angle.
 
 ## App Screenshots
+These screenshots show the following screens: the homepage, the camera angle adjustment screen, the game initialization screen, the in-game screen, and the winner screen, respectively.
+![HomePage](./screenshots/homepage.jpg)
+![CameraAngleAdjustment](./screenshots/angle_adjust.jpg)
+![GameInitialization](./screenshots/game_start.jpg)
+![InGame](./screenshots/in_game.jpg)
+
+#### Platform Availability
+The game is intended to be available on macOS, Windows, and Linux. However, it has only been tested on macOS at this time.
+
