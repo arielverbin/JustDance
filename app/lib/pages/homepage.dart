@@ -83,6 +83,11 @@ class HomePageState extends State<HomePage> {
   Future<void> _loadGameAndStart(BuildContext context, Song song) async {
     if (gameStarted) return;
 
+    AudioPlayer audioPlayer = AudioPlayer();
+    audioPlayer.setVolume(0.6);
+    audioPlayer.play(
+        AssetSource('sound-effects/game-start.mp3'));
+
     setState(() {
       gameStarted = true;
     });

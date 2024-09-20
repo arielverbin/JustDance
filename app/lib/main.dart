@@ -116,6 +116,10 @@ class InitPageState extends State<InitPage>
 
       AudioPlayer audioPlayer = AudioPlayer();
       audioPlayer.setVolume(0.6);
+      audioPlayer.play(
+          AssetSource('sound-effects/dance-intro.mp3'));
+
+      setState(() { _loadText = "Initializing model..."; });
       audioPlayer.play(AssetSource('sound-effects/dance-intro.mp3'));
 
       setState(() {
