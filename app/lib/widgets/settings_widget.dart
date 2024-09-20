@@ -58,6 +58,41 @@ class SettingWidgetState extends State<SettingWidget> {
           ],
         ),
       ),
+          ),
+          const SizedBox(height: 10),
+          CharacterPickWidget(
+            updatePlayerSelections:
+            widget.updatePlayerSelections, // Forward the callback
+          ),
+        ),
+        const SizedBox(height: 10),
+        CharacterPickWidget(
+          updatePlayerSelections: widget.updatePlayerSelections,  // Forward the callback
+        ),
+        const SizedBox(height: 16),
+        const CameraWidget(),
+        FloatingActionButton(onPressed: () {Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const WinnerPage(
+              players: ['caleb', 'liam'],
+              plotScoresPlayer1: [FlSpot(0, 100), FlSpot(20, 30), FlSpot(40, 70), FlSpot(60, 0), FlSpot(80, 10), FlSpot(100, 80)],
+              plotScoresPlayer2: [FlSpot(0, 50), FlSpot(20, 70), FlSpot(40, 20), FlSpot(60, 70), FlSpot(80, 100), FlSpot(100, 20)],
+            )
+          ),
+        );
+        })
+      ],
+          const SizedBox(height: 16),
+          const CameraWidget(),
+          const SizedBox(height: 16),
+          AdjustAngleWidget(
+            updateCameraAngle: widget.updateCameraAngle,
+            cameraAngle: widget.cameraAngle
+          ),
+          const SizedBox(height: 26),
+          const AboutJustDance(),
+        ],
     );
   }
 }

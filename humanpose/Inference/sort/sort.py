@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
+from scipy.optimize import linear_sum_assignment
 
 np.random.seed(0)
 
@@ -29,7 +30,6 @@ def linear_assignment(cost_matrix):
         _, x, y = lap.lapjv(cost_matrix, extend_cost=True)
         return np.array([[y[i], i] for i in x if i >= 0])
     except ImportError:
-        from scipy.optimize import linear_sum_assignment
         x, y = linear_sum_assignment(cost_matrix)
         return np.array(list(zip(x, y)))
 
@@ -106,26 +106,34 @@ class KalmanBoxTracker(object):
 
         self.kf.x[:4] = convert_bbox_to_z(bbox)
         self.time_since_update = 0
-        self.id = KalmanBoxTracker.count
         KalmanBoxTracker.count += 1
+        self.id = KalmanBoxTracker.count
         self.history = []
         self.hits = 0
         self.hit_streak = 0
         self.age = 0
         self.score = score
 
-    def update(self, bbox, score):
+    # def update(self, bbox, score):
+    def update(self, bbox, score, is_matched):
         """
         Updates the state vector with observed bbox.
         """
+        print("what is this?!")
         self.time_since_update = 0
         self.history = []
         self.hits += 1
         self.hit_streak += 1
+        # Also consider the predictions.
+        # else:
         self.kf.update(convert_bbox_to_z(bbox))
+        # Trust the detections.
+        if is_matched:
+            self.kf.x[:4] = convert_bbox_to_z(bbox)
         self.score = score
 
     def predict(self):
+        print(self.count)
         """
         Advances the state vector and returns the predicted bounding box estimate.
         """
@@ -197,6 +205,44 @@ def associate_detections_to_trackers(detections, trackers, iou_threshold=0.1):
     return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
 
+def mse_batch(dets, trks):
+    """
+    Returns a matrix of MSE between each det and trk.
+    """
+    # Get only the bounding box coordinates (ignore the scores)
+    dets_bboxes = dets[:, :4]
+    trks_bboxes = trks[:, :4]
+
+    # Expand dims to broadcast and calculate MSE for each pair
+    dets_expanded = np.expand_dims(dets_bboxes, axis=1)  # shape (N, 1, 4)
+    trks_expanded = np.expand_dims(trks_bboxes, axis=0)  # shape (1, M, 4)
+
+    # Calculate MSE between all dets and trks
+    mse_matrix = np.mean((dets_expanded - trks_expanded) ** 2, axis=2)  # shape (N, M)
+
+    return mse_matrix
+
+
+def match_dets_trks_with_mse(dets, trks):
+    """
+    Matches detection bboxes to tracker bboxes using MSE as the cost metric.
+    """
+    if len(dets) == 0 or len(trks) == 0:
+        return []
+
+    # Calculate the MSE cost matrix
+    mse_matrix = mse_batch(dets, trks)
+
+    # Use the linear sum assignment to find the best matches
+    det_indices, trk_indices = linear_sum_assignment(mse_matrix)
+    matches = []
+
+    for det_idx, trk_idx in zip(det_indices, trk_indices):
+        matches.append([det_idx, trk_idx])
+
+    return matches
+
+
 class Sort(object):
     def __init__(self, max_age=1, min_hits=3, iou_threshold=0.1):
         """
@@ -207,28 +253,29 @@ class Sort(object):
         self.iou_threshold = iou_threshold
         self.trackers = []
         self.frame_count = 0
+        self.protected = []
+        self.recovery_mode = False
 
-    def update(self, dets=np.empty((0, 5)), protect=None):
+    def add_protected(self, protected):
+        self.protected = protected
+        self.trackers = [trk for trk in self.trackers if trk.id in protected]
+
+    def update(self, dets=np.empty((0, 5))):
         """
-        Args:
-            dets: a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
-                Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
-                5)) for frames without detections).
-            protect: a list of ID's that should not be deleted, even if they are not detected.
-                For example, if protect=[player1, player2] and tracker1 (for player1) have no matching detections,
-                return player1's location solely based on the tracker1's prediction.
-
-        Returns:
-            Returns a similar array (like dets), where the last column is the object ID.
-                The returned array MUST include bbox for the protected ID's.
+        Params: dets - a numpy array of detections in the format [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
+        Requires: this method must be called once for each frame even with empty detections (use np.empty((0,
+        5)) for frames without detections). Returns a similar array, where the last column is the object ID.
 
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
-        if protect is None:
-            protect = []
-
         self.frame_count += 1
+        print(f"frame count = {self.frame_count}")
+
+        if self.frame_count == 30:
+            self.add_protected([1])
+
         empty_dets = dets.shape[0] == 0
+        print(dets)
 
         # get predicted locations from existing trackers.
         trks = np.zeros((len(self.trackers), 5))
@@ -244,33 +291,99 @@ class Sort(object):
             self.trackers.pop(t)
         matched, unmatched_dets, unmatched_trks = associate_detections_to_trackers(dets, trks, self.iou_threshold)
 
-        # update matched trackers with assigned detections
-        for m in matched:
-            self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1])
+        # Track all detected objects.
+        if not self.protected:
+            # update matched trackers with assigned detections
+            for m in matched:
+                self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
 
-        # create and initialise new trackers for unmatched detections
-        for i in unmatched_dets:
-            trk = KalmanBoxTracker(dets[i, :], dets[i, -1])
-            self.trackers.append(trk)
+            # create and initialise new trackers for unmatched detections
+            for i in unmatched_dets:
+                trk = KalmanBoxTracker(dets[i, :], dets[i, -1])
+                self.trackers.append(trk)
 
-        i = len(self.trackers)
-        unmatched = []
-        for trk in reversed(self.trackers):
-            d = trk.get_state()[0]
-            if (trk.time_since_update < 1) and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
-                # +1 as MOT benchmark requires positive
-                ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
-            i -= 1
-            # remove dead tracklet
-            if trk.time_since_update > self.max_age:
-                self.trackers.pop(i)
-            if empty_dets:
-                unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+            i = len(self.trackers)
+            unmatched = []
+            for trk in reversed(self.trackers):
+                d = trk.get_state()[0]
+                if (trk.time_since_update < 1) and (
+                        trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
+                    # +1 as MOT benchmark requires positive
+                    ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+                i -= 1
+                # remove dead tracklet
+                if trk.time_since_update > self.max_age:
+                    self.trackers.pop(i)
+                if empty_dets:
+                    unmatched.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
 
-        if len(ret):
-            return np.concatenate(ret)
-        elif empty_dets:
-            return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
+            if len(ret):
+                return np.concatenate(ret)
+            elif empty_dets:
+                return np.concatenate(unmatched) if len(unmatched) else np.empty((0, 6))
+            return np.empty((0, 6))
+
+        # Track only the players - do not remove and do not add anyone.
+        else:
+            if not len(unmatched_trks):
+                print(" --------------------------------- IOU good ---------------------------------")
+                self.recovery_mode = False
+                # update matched trackers with assigned detections
+                for m in matched:
+                    self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
+
+                for trk in reversed(self.trackers):
+                    d = trk.get_state()[0]
+                    if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
+                        ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+
+                if len(ret):
+                    print("ret is: ")
+                    print(np.concatenate(ret))
+                    return np.concatenate(ret)
+
+                return np.empty((0, 6))
+
+            elif len(unmatched_trks) and not self.recovery_mode:
+                print(" --------------------------------- Predictions ---------------------------------")
+                self.recovery_mode = True
+                print("2nd here")
+                for trk in reversed(self.trackers):
+                    d = trk.get_state()[0]
+                    ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+
+                print("ret is: ")
+                print(np.concatenate(ret))
+                return np.concatenate(ret)
+
+            elif len(unmatched_trks) and self.recovery_mode:
+                print(" --------------------------------- MSE ---------------------------------")
+                print(dets)
+                for trk in reversed(self.trackers):
+                    print(trk.get_state()[0])
+
+                print(f"dets = {dets}")
+                print(" ------------------------------------------------------------------")
+                print(f"self.trackers = {self.trackers}")
+                matched = match_dets_trks_with_mse(dets, trks)
+                print(f"matched = {str(matched)}")
+                for m in matched:
+                    print(f"m = {m}")
+                    print(f"str m = {str(m)}")
+                    self.trackers[m[1]].update(dets[m[0], :], dets[m[0], -1], is_matched=True)
+
+                for trk in reversed(self.trackers):
+                    d = trk.get_state()[0]
+                    if trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
+                        ret.append(np.concatenate((d, [trk.score, trk.id + 1])).reshape(1, -1))
+
+                if len(ret):
+                    print("ret is: ")
+                    print(np.concatenate(ret))
+                    return np.concatenate(ret)
+
+                return np.empty((0, 6))
+
         return np.empty((0, 6))
 
     def reset(self):
