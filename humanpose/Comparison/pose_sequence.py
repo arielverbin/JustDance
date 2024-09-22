@@ -52,9 +52,10 @@ class PoseSequence:
             preprocess_method: function
                 The pre-process method what will be used.
         """
-        self.preprocessed_poses = []
-        for pose in self.poses:
-            self.preprocessed_poses.append(preprocess_method(Pose(pose)))
+        if self.preprocessed_poses is None:
+            self.preprocessed_poses = []
+            for pose in self.poses:
+                self.preprocessed_poses.append(preprocess_method(Pose(pose)))
 
     def __iter__(self):
         return iter(self.poses)

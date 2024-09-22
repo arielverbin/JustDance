@@ -40,7 +40,8 @@ class AngularScore(PoseScore):
         self.factor = factor
         self.angles_weights = np.array(joints)[:, 3]
 
-    def process_target(self, target_pose):
+    @staticmethod
+    def process_pose(target_pose):
         v1 = target_pose.get_coordinates()
         processed_target = []
         for joint in joints:
@@ -49,6 +50,9 @@ class AngularScore(PoseScore):
             processed_target.append(angle)
 
         return processed_target
+
+    def process_target(self, target_pose):
+        return AngularScore.process_pose(target_pose)
 
     def compare(self, preprocessed_target, pose):
         """
