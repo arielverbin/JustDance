@@ -92,6 +92,9 @@ class PoseSequenceScore:
         end_index = max((len(self.weights) + size) // 2, len(self.weights))
         return self.weights[start_index:end_index]
 
+    def preprocess_target(self, pose):
+        return self.score_method.process_target(pose)
+
     def compare(self, pose, time, preprocessed=False):
         """
         Calculating the weight between the given pose and poses around the given time.

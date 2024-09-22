@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import 'alert_widget.dart';
+
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
 
@@ -60,7 +62,19 @@ class CameraPageState extends State<CameraPage> {
       _renderer.srcObject = _localStream;
       setState(() {}); // Notify the UI that the camera feed is ready
     } catch (e) {
-      print('Error initializing camera: $e');
+
+      // Gently handle errors.
+      if(mounted) {
+        AlertWidget.showError(context,
+          AlertWidget(
+            icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 40.0),
+            color: Colors.grey.shade800,
+            title: "Error Accessing Camera",
+            content: e.toString(),
+            duration: 2,
+          ),
+        );
+      }
     }
   }
 

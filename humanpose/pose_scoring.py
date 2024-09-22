@@ -1,3 +1,4 @@
+from Comparison.movement_score import MovementScore
 from Utils.load_utils import load_song
 from Utils.game_manager import GameManager
 from Utils.game_utils import track_players, score_dance
@@ -18,6 +19,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         self.game_manager = None
         self.comparator = None
         self.score_controller = None
+        self.movement_score = None
         self.pose_estimation_thread = None
         self.tracking_thread = None
         self.game_init_thread = None
@@ -76,15 +78,15 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
 
         self.comparator = PoseSequenceScore(target_sequence, "angular", window_duration=1.5,
                                             weights_config=weights_config)
-        print("well well well")
         self.score_controller = ScoreController(time_window=2, dance_duration=target_sequence.duration())
-        print("well well well")
+        self.movement_score = MovementScore(target_sequence, factor=2)
 
         self.game_manager.init_camera()
 
         self.tracking_thread = threading.Thread(target=track_players, args=(self.game_manager,))
         self.pose_estimation_thread = threading.Thread(target=score_dance, args=(self.comparator,
                                                                                  self.score_controller,
+                                                                                 self.movement_score,
                                                                                  self.game_manager))
 
         self.tracking_thread.start()
@@ -189,6 +191,7 @@ class PoseScoringService(service_pb2_grpc.ScoringPoseService):
         print("[LOG] Joined all threads.")
 
         self.score_controller = None
+        self.movement_score = None
         self.game_manager.reset()
         self.model.reset()
 

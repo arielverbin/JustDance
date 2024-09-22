@@ -1,8 +1,5 @@
-import 'package:app/app_storage.dart';
-import 'package:app/pages/winner_page.dart';
 import 'package:app/widgets/character_pick_widget.dart';
 import 'package:app/widgets/clear_storage.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:app/widgets/adjust_angle_page.dart';
 import 'package:app/widgets/about_just_dance.dart';

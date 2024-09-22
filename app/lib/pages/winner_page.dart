@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/service/client.dart';
 import '../utils/service/service.pbgrpc.dart';
+import '../widgets/alert_widget.dart';
 import '../widgets/gradient_text.dart';
 
 class WinnerPage extends StatefulWidget {
@@ -78,10 +79,11 @@ class WinnerPageState extends State<WinnerPage> with SingleTickerProviderStateMi
   }
 
   Future<void> _initializeWinnerAndScores() async {
-    final client = ScoringPoseServiceClient(getClientChannel());
-    EndStatus status = await client.endGame(EndRequest());
     try {
+      final client = ScoringPoseServiceClient(getClientChannel());
+      EndStatus status = await client.endGame(EndRequest());
       winner = status.winner;
+
       if (widget.players.length > 1) {
         if (winner == 0) {
           winnerName = widget.players[0];
@@ -109,7 +111,18 @@ class WinnerPageState extends State<WinnerPage> with SingleTickerProviderStateMi
       widget.updateAndSaveNewScore(widget.songName, secondPlace!, secondScore!);
 
     } catch (err) {
-      print("ERROR: ${err.toString()}");
+      // Gently handle errors.
+      if(mounted) {
+        AlertWidget.showError(context,
+          AlertWidget(
+            icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 40.0),
+            color: Colors.grey.shade800,
+            title: "Error Loading Scores",
+            content: err.toString(),
+            duration: 2,
+          ),
+        );
+      }
     }
 
 

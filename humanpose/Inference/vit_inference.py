@@ -1,4 +1,3 @@
-import time
 from typing import Optional
 import typing
 import threading
@@ -143,7 +142,6 @@ class VitInference:
         Returns:
             the predicted bboxes for each person with a tracker.
         """
-        start_time = time.time()
         # Use YOLOv8 for detection
         res_pd = np.empty((0, 5))
         if (self.tracker is None or

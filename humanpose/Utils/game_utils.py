@@ -43,12 +43,13 @@ def track_players(game_manager):
     cv2.destroyAllWindows()
 
 
-def score_dance(comparator, score_controller, game_manager):
+def score_dance(comparator, score_controller, score_movement, game_manager):
     """
     Works on its own thread. Responsible for performing the human pose estimation and calculating the score.
     Args:
         comparator: the comparator method.
         score_controller: the method for stabilizing the score and calculating the total score.
+        score_movement: the method for analyzing the player's movement and adjusting the score accordingly.
         game_manager: used to contact with the other threads.
     """
     model = game_manager.get_inference_model()
@@ -83,10 +84,15 @@ def score_dance(comparator, score_controller, game_manager):
             for player_id, current_pose in keypoints.items():
                 print(f"[LOG] Person {player_id} detected.")
                 if player_id in players:
+
                     # Calculate comparison value.
-                    comparison = comparator.compare(pose=Pose(current_pose), time=current_time, preprocessed=False)
+                    preprocessed_pose = comparator.preprocess_target(Pose(current_pose))
+                    comparison = comparator.compare(pose=preprocessed_pose, time=current_time, preprocessed=True)
+
                     # Convert comparison value to score.
-                    score = comparator.convert_to_score(comparison)
+                    pre_score = comparator.convert_to_score(comparison)
+                    score = score_movement.process_score(player_id, current_time, preprocessed_pose, pre_score)
+
                     # Stabilize score and calculate total player's score.
                     scores[player_id] = score_controller.process_score(player_id, score, current_time)
 
