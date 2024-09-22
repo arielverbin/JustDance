@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'package:app/pages/homepage.dart';
 import 'package:app/utils/service/client.dart';
-import 'package:app/utils/service/init_py.dart';
+import 'package:app/utils/service/init_py.dart'; // DO NOT REMOVE.
 import 'package:app/utils/service/service.pbgrpc.dart';
 
 import 'package:flutter/material.dart';
@@ -16,7 +16,7 @@ Future<void> initService = Future(() => null);
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // initService = initPy(); // Uncomment this line when not debugging
-  initService = Future.delayed(const Duration(seconds: 2), () => null);
+  initService = Future.delayed(const Duration(seconds: 2), () => null); // Comment out when not debugging.
 
   runApp(const MainApp()); // Change back to MainApp!
 }

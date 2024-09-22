@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'dart:math';
 
+import '../widgets/alert_widget.dart';
 import '../widgets/gradient_text.dart';
 import 'package:app/utils/service/service.pbgrpc.dart';
 
@@ -122,7 +123,21 @@ class GameStartState extends State<GameStartPage> {
           }
         }
       } catch (e) {
-        print('Error: $e');
+
+        // Gently handle errors.
+        if(mounted) {
+          AlertWidget.showError(context,
+            AlertWidget(
+              icon: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 40.0),
+              color: Colors.grey.shade800,
+              title: "Error Starting Game",
+              content: e.toString(),
+              duration: 2,
+            ),
+          );
+
+          Navigator.pop(context);
+        }
       }
     }
   }

@@ -7,6 +7,7 @@ import 'package:app/pages/winner_page.dart';
 
 import '../utils/service/client.dart';
 import '../utils/service/service.pbgrpc.dart';
+import '../widgets/quit_widget.dart';
 
 class InGamePage extends StatefulWidget {
   final String songName;
@@ -27,7 +28,7 @@ class InGamePage extends StatefulWidget {
   InGamePageState createState() => InGamePageState();
 }
 
-class InGamePageState extends State<InGamePage> {
+class InGamePageState extends State<InGamePage> with SingleTickerProviderStateMixin {
   late VideoPlayerController _controller;
   List<int> scores = [0, 0];
   List<int> totalScores = [0, 0];
@@ -38,6 +39,11 @@ class InGamePageState extends State<InGamePage> {
   late bool _inGame = true;
   late DateTime startTime;
 
+  // For the quit button.
+  late AnimationController _quitController;
+  late Animation<Offset> _quitAnimation;
+  bool _isMouseNearEdge = false;
+  bool quitting = false;
 
   @override
   void initState() {
@@ -59,6 +65,22 @@ class InGamePageState extends State<InGamePage> {
     _controller.play();
     startTime = DateTime.now();
 
+
+    // Initialize animation controller
+    _quitController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    // Create a slide animation from left
+    _quitAnimation = Tween<Offset>(
+      begin: const Offset(-1.0, 0.0),  // Start off-screen on the left
+      end: const Offset(0.0, 0.0),     // Fully visible on the screen
+    ).animate(CurvedAnimation(
+      parent: _quitController,
+      curve: Curves.easeInOut,
+    ));
+
     // Start the timer to update scores
     _maintainScore();
     _updateScoreAnimation(updateEvery: 1000);
@@ -75,13 +97,9 @@ class InGamePageState extends State<InGamePage> {
 
   // Function to maintain the scores, updating them in a loop
   void _maintainScore() async {
-    double timePassed;
-
     while (_inGame) {
       // Check if the widget is mounted before running the loop
       var (newScores, newTotalScores) = await _getScore(); // Get new scores
-
-      timePassed = DateTime.now().difference(startTime).inSeconds.toDouble();
 
       if (_inGame) {
         // Check if the widget is mounted before calling setState
@@ -96,6 +114,20 @@ class InGamePageState extends State<InGamePage> {
         });
       }
     }
+  }
+
+  void quitGame() async {
+
+    if (quitting) return;
+    setState(() { quitting = true; });
+
+    final client = ScoringPoseServiceClient(getClientChannel());
+    await client.endGame(EndRequest()); // Ignore result and winner.
+
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+
   }
 
   void _updateScoreAnimation({required int updateEvery}) {
@@ -126,7 +158,8 @@ class InGamePageState extends State<InGamePage> {
     if (!_controller.value.isPlaying &&
         _controller.value.position == _controller.value.duration) {
       _inGame = false;
-      _navigateToWinnerPage();
+
+      if(!quitting) { _navigateToWinnerPage(); }
     }
   }
 
@@ -145,9 +178,25 @@ class InGamePageState extends State<InGamePage> {
     ));
   }
 
+  void _onMouseHover(PointerEvent details) {
+
+    if (details.position.dx < 10 && !_isMouseNearEdge) {
+      _isMouseNearEdge = true;
+      _quitController.forward();  // Slide the QuitWidget in
+      setState(() {});  // Update the UI only once when entering the area
+    }
+
+    else if (details.position.dx > 50 && _isMouseNearEdge) {
+      _isMouseNearEdge = false;
+      _quitController.reverse();  // Slide the QuitWidget out
+      setState(() {});  // Update the UI only once when leaving the area
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _quitController.dispose();
     super.dispose();
   }
 
@@ -155,8 +204,10 @@ class InGamePageState extends State<InGamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
+      body: MouseRegion(onHover: _onMouseHover, child:
+      Stack(
         children: <Widget>[
+
           Center(
             child: _controller.value.isInitialized
                 ? SizedBox.expand(
@@ -172,6 +223,7 @@ class InGamePageState extends State<InGamePage> {
                 : const CircularProgressIndicator(),
           ),
           _buildGradientBackground(),
+
           // Displaying logo in the bottom right
           Positioned(
             bottom: 20.0,
@@ -210,9 +262,18 @@ class InGamePageState extends State<InGamePage> {
                 alignment: Alignment.topRight,
               ),
             ),
+
+          Positioned(
+            left: 0,  // Always slides in from the left
+            child: SlideTransition(
+              position: _quitAnimation,
+              child: QuitWidget(quitGameCallback: quitGame,),  // Your custom QuitWidget
+            ),
+          ),
+
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildGradientBackground() {
