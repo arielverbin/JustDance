@@ -21,6 +21,7 @@ class MovementScore:
 
         self.approx_duration = approx_duration
         self.window_duration = window_duration
+        self.bound_intervals = 0.09
         self.players = {}
         self.num_joints = len(joints)
         self.factor = factor
@@ -70,7 +71,9 @@ class MovementScore:
 
         self.players['target'] = {
             'poses': [],
-            'speeds': []
+            'speeds': [],
+            'last-speed': 0,
+            'last-time': 0
         }
 
         for i, pose in enumerate(poses):
@@ -89,20 +92,17 @@ class MovementScore:
             # Player is new.
             self.players[player_id] = {
                 'poses': [(current_time, player_pose)],
-                'speeds': [(0, 100)]
+                'speeds': [(0, 50)],
+                'last-speed': 50,
+                'last-time': current_time
             }
             return 0
 
+        if current_time - self.players[player_id]['last-time'] < self.bound_intervals:
+            return self.players[player_id]['last-speed']
+
         self.players[player_id]["poses"].append((current_time, player_pose))
         self.remove_old(player_id, current_time)
-
-        if len(self.players[player_id]['poses']) < 2:
-            self.abort_threshold -= 1
-            if self.abort_threshold == 0:
-                print("[LOG] Computer is too slow to perform speed analysis. Removing.")
-
-            self.players[player_id]['speeds'].append((current_time, 36))
-            return 36
 
         player_movement = self.calculate_movement(player_id)
 
@@ -111,6 +111,8 @@ class MovementScore:
                          ]) / (len(self.players[player_id]['speeds']) + 1e-5)
 
         self.players[player_id]['speeds'].append((current_time, player_movement))
+        self.players[player_id]['last-time'] = current_time
+        self.players[player_id]['last-speed'] = player_movement
 
         final_movement = 0.7 * avg_speed + 0.3 * player_movement
 
@@ -167,6 +169,7 @@ class MovementScore:
             t2, pose2 = measurements[i]
 
             delta_t = t2 - t1
+            print(f"delta_t: {delta_t:.4f}", end=" ")
 
             if delta_t > 0:
                 # For each joint, calculate the speed and accumulate it
