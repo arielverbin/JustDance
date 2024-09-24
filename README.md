@@ -19,17 +19,17 @@ This project involves two main components:
 These screenshots show the following screens: the homepage, the camera angle adjustment screen, the game initialization screen, the in-game screen, and the winner screen, respectively.
 
 <div align="center">
-  <img src="./screenshots/homepage.jpg" alt="HomePage" width="45%" style="margin-right:10px;"/>
+  <img src="./screenshots/homepage.png" alt="HomePage" width="45%" style="margin-right:10px;"/>
   <img src="./screenshots/angle_adjust.jpg" alt="CameraAngleAdjustment" width="45%"/>
 </div>
 
 <div align="center">
-  <img src="./screenshots/game_start.jpg" alt="GameInitialization" width="45%" style="margin-right:10px;"/>
+  <img src="./screenshots/game_start.png" alt="GameInitialization" width="45%" style="margin-right:10px;"/>
   <img src="./screenshots/in_game.jpg" alt="InGame" width="45%"/>
 </div>
 
 <div align="center">
-  <img src="./screenshots/winner_page.jpg" alt="WinnerPage" width="45%" style="margin-right:10px;"/>
+  <img src="./screenshots/winner_page.png" alt="WinnerPage" width="45%" style="margin-right:10px;"/>
 </div>
 
 ## Getting Started
@@ -77,5 +77,10 @@ These screenshots show the following screens: the homepage, the camera angle adj
 
 #### Platform Availability
 The game is intended to be available on macOS, Windows, and Linux. However, it has only been tested on macOS at this time.
+
+
+#### Note
+
+The project’s methodology, including details on the algorithms used, is documented in files located within the `/reports/` folder. These files explain the technical approaches, steps, and processes employed throughout the project.
 
 <br></br>
