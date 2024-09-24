@@ -41,7 +41,7 @@ class MovementScore:
         # If their movements are correct, the score might have slightly decrease due to timing differences.
         # In this case - *1.25 will help maintain a high score.
         if player_movement > 55:
-            return score * 1.25
+            return min(score * 1.25, 100)
 
         # Player is somewhat moving, but not enough to penalize their score.
         if player_movement > 35:

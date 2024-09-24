@@ -15,9 +15,9 @@ class AppStorage {
 
   List<Song> getSongs() {
     return [
-      Song('Test App', 'Just Dance Team', {}, 'assets/images/test-app.png', "test-app", 1),
-      Song('Unicorn', 'Noa Kirel', {}, 'assets/images/background.png', "unicorn", 2),
       Song('Seven Rings', 'Ariana Grande', {}, 'assets/images/seven-rings.png', "seven-rings", 3),
+      Song('Unicorn', 'Noa Kirel', {}, 'assets/images/background.png', "unicorn", 2),
+      Song('Test App', 'Just Dance Team', {}, 'assets/images/test-app.png', "test-app", 1),
       Song('Starships', 'Nicky Minaj', {}, 'assets/images/background.png', "starships", 4),
     ];
   }
