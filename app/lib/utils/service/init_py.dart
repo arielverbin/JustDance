@@ -26,7 +26,7 @@ Future<void> _waitForServer() async {
   var request = HealthCheckRequest();
   var started = false;
 
-  for (var i = 0; i < 30; i++) {
+  for (var i = 0; i < 300; i++) {
     try {
       var r = await cleint.check(request);
 

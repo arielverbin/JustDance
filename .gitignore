@@ -8,6 +8,6 @@ yolov5su.pt
 yolov8m.pt
 *.mov
 server.bin
-server.dist
+app/assets/pose-scoring/server.dist
 server.build
 server.onefile-build

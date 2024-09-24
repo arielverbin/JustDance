@@ -1,17 +1,30 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
-import 'py_file_info.dart';
 import 'client.dart';
 
 Future<void> initPyImpl({String host = "localhost", int? port}) async {
-  var dir = await getApplicationSupportDirectory();
-  var filePath = await _prepareExecutable(dir.path);
+  String workingDirectory = p.join(Directory.current.path, 'assets/pose-scoring');
+  if (!Directory(workingDirectory).existsSync()) {
+    throw 'The directory $workingDirectory does not exist';
+  }
 
-  // Ask OS to provide a free port if port is null and host is localhost
+  String serverDist = p.join(workingDirectory, 'server.dist');
+  String serverExecutable = p.join(workingDirectory, 'server.dist/server.bin');
+
+  if (!File(serverExecutable).existsSync()) {
+    if (defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux) {
+      await Process.run("chmod", ["u+x", serverDist]);
+      await Process.run("chmod", ["u+x", serverExecutable]);
+    }
+    if (!File(serverExecutable).existsSync()) {
+      throw 'The server binary $serverExecutable does not exist';
+    }
+  }
+
   if (port == null && host == "localhost") {
     var serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     port = serverSocket.port;
@@ -21,99 +34,48 @@ Future<void> initPyImpl({String host = "localhost", int? port}) async {
 
   await shutdownPyIfAnyImpl();
 
-  if (defaultTargetPlatform == TargetPlatform.macOS ||
-      defaultTargetPlatform == TargetPlatform.linux) {
-    await Process.run("chmod", ["u+x", filePath]);
-  }
-  var p = await Process.start(filePath, [port.toString()]);
+  Process process = await Process.start(
+    './server.dist/server.bin',
+    [port.toString()],
+    workingDirectory: workingDirectory,
+    runInShell: true,
+  );
 
-  int? exitCode;
-
-  p.exitCode.then((v) {
-    exitCode = v;
+  // Capture server output and errors to debug any issues
+  process.stdout.transform(utf8.decoder).listen((data) {
+    print('Server stdout: $data');
   });
 
-  // Give a couple of seconds to make sure there're no exceptions upon lanuching Python server
+  process.stderr.transform(utf8.decoder).listen((data) {
+    print('Server stderr: $data');
+  });
 
-  await Future.delayed(const Duration(seconds: 1));
+  // Check if the process exits with an error immediately
+  int? exitCode;
+  process.exitCode.then((code) {
+    exitCode = code;
+  });
+
+  // Wait a short time to ensure the process starts correctly
+  await Future.delayed(const Duration(seconds: 2));
   if (exitCode != null) {
     throw 'Failure while launching server process. It stopped right after starting. Exit code: $exitCode';
   }
+
+  print('Server is running on port $port');
 }
 
-Future<String> _prepareExecutable(String directory) async {
-  var file = File(p.join(directory, _getAssetName()));
-  var versionFile = File(p.join(directory, versionFileName));
-
-  if (!file.existsSync()) {
-    ByteData pyExe =
-        await PlatformAssetBundle().load('assets/${_getAssetName()}');
-    await _writeFile(file, pyExe, versionFile);
-  } else {
-    // Check version file and asset sizes, version in the file and the constant
-    // If they do not match or the version file does not exist, update the executable and version file
-    var versionMismatch = false;
-    ByteData pyExe =
-        await PlatformAssetBundle().load('assets/${_getAssetName()}');
-    var loadedBinarySize = pyExe.buffer.lengthInBytes;
-    var currentBinarySize = await file.length();
-    if (loadedBinarySize != currentBinarySize) {
-      versionMismatch = true;
-    }
-
-    if (!versionFile.existsSync()) {
-      versionMismatch = true;
-    } else {
-      var fileVersion = await versionFile.readAsString();
-
-      if (fileVersion != currentFileVersionFromAssets) {
-        versionMismatch = true;
-      }
-    }
-
-    if (versionMismatch) {
-      await _writeFile(file, pyExe, versionFile);
-    }
-  }
-
-  return file.path;
-}
-
-Future<void> _writeFile(File file, ByteData pyExe, File versionFile) async {
-  if (file.existsSync()) {
-    file.deleteSync();
-  }
-  await file.create(recursive: true);
-  await file.writeAsBytes(pyExe.buffer.asUint8List());
-  await versionFile.writeAsString(currentFileVersionFromAssets);
-}
-
-/// Searches for any processes that match Python server and kills those
 Future<void> shutdownPyIfAnyImpl() async {
-  var name = _getAssetName();
-
+  // Implement logic to kill existing server process by name (server.bin)
   switch (defaultTargetPlatform) {
     case TargetPlatform.linux:
     case TargetPlatform.macOS:
-      await Process.run('pkill', [name]);
+      await Process.run('pkill', ['server.dist/server.bin']);
       break;
     case TargetPlatform.windows:
-      await Process.run('taskkill', ['/F', '/IM', name]);
+      await Process.run('taskkill', ['/F', '/IM', 'server.dist/server.bin']);
       break;
     default:
       break;
   }
-}
-
-String _getAssetName() {
-  var name = '';
-
-  if (defaultTargetPlatform == TargetPlatform.windows) {
-    name += '${exeFileName}_win.exe';
-  } else if (defaultTargetPlatform == TargetPlatform.macOS) {
-    name += '${exeFileName}_osx';
-  } else if (defaultTargetPlatform == TargetPlatform.linux) {
-    name += '${exeFileName}_lnx';
-  }
-  return name;
 }

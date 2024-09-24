@@ -15,8 +15,7 @@ Future<void> initService = Future(() => null);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // initService = initPy(); // Uncomment this line when not debugging
-  initService = Future.delayed(const Duration(seconds: 2), () => null); // Comment out when not debugging.
+  initService = initPy(); // Uncomment this line when not debugging
 
   runApp(const MainApp()); // Change back to MainApp!
 }
