@@ -28,6 +28,54 @@ These screenshots show the following screens: the homepage, the camera angle adj
   <img src="./screenshots/in_game.jpg" alt="InGame" width="45%"/>
 </div>
 
+<div align="center">
+  <img src="./screenshots/winner_page.jpg" alt="WinnerPage" width="45%" style="margin-right:10px;"/>
+</div>
+
+## Getting Started
+
+### macOS Users
+1. **Clone the Project:** Clone the repository to your local machine.
+
+2. **Download Required Files:** Since these files were too large to be included in the Git repository, please download them from [here](https://drive.google.com/drive/folders/1KEBS4vHSfZPdqgpCSK7do0r8hSjc7tpv).
+     - `vitpose-b-coco.pth` and `yolov8m.pt` to `/app/assets/pose-scoring/Inference/weights/`.
+     - `seven-rings.mov` and `test-app.mov` to `/app/assets/songs/`.
+     - `server.dist` to `/app/assets/pose-scoring/`.
+
+3. **Install Dependencies:** Ensure that all necessary dependencies are installed. Refer to the `pubspec.yaml` file for Flutter dependencies, and install them as needed using:
+     ```bash
+     flutter pub get
+     ```
+
+4. **Run the App:** Use Flutter to run the app by navigating to the project directory and running:
+     ```bash
+     flutter run
+     ```
+
+<br></br>
+
+### Non-macOS Users
+1. **Clone the Project:** Clone the repository to your local machine.
+
+2. **Download Required Files:** Since these files were too large to be included in the Git repository, please download them from [here](https://drive.google.com/drive/folders/1KEBS4vHSfZPdqgpCSK7do0r8hSjc7tpv).
+     - `vitpose-b-coco.pth` and `yolov8m.pt` to `/app/assets/pose-scoring/Inference/weights/`.
+     - `seven-rings.mov` and `test-app.mov` to `/app/assets/songs/`.
+
+3. **Run the Server:** Navigate to the `humanpose` server directory and start the server:
+     ```bash
+     cd humanpose
+     python3 server.py
+     ```
+   - Ensure that all dependencies listed in the `requirements.txt` file are installed.
+
+4. **Run the App:** After the server is running, start the Flutter app using:
+     ```bash
+     flutter run
+     ```
+
+<br></br>
+
 #### Platform Availability
 The game is intended to be available on macOS, Windows, and Linux. However, it has only been tested on macOS at this time.
 
+<br></br>
